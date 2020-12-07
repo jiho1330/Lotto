@@ -11,6 +11,7 @@ import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.JsonReader;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -82,6 +83,8 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         });
         marker.setMap(naverMap);
+
+        searchPlace("로또");
 //        CameraPosition cameraPosition = new CameraPosition(
 //                new LatLng(33.38, 126.55),  // 위치 지정
 //                9                           // 줌 레벨
@@ -120,7 +123,6 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     // 네이버 장소 검색
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public String searchPlace(String keyword){
         try {
             keyword = URLEncoder.encode(keyword, "UTF-8");
@@ -132,8 +134,10 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         //String apiURL = "https://openapi.naver.com/v1/search/blog.xml?query="+ text; // xml 결과
 
         Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("X-Naver-Client-Id", "Client ID값 입력");
-        requestHeaders.put("X-Naver-Client-Secret", "Client Secret값 입력");
+        requestHeaders.put("X-NCP-APIGW-API-KEY-ID", "s43jhlawk0");
+        requestHeaders.put("X-NCP-APIGW-API-KEY", "UexfyjgnocdVBePjvvgvqf8zs8FYcJ25h3v83LeZ");
+//        requestHeaders.put("X-Naver-Client-Id", "s43jhlawk0");
+//        requestHeaders.put("X-Naver-Client-Secret", "UexfyjgnocdVBePjvvgvqf8zs8FYcJ25h3v83LeZ");
         String responseBody = get(apiURL,requestHeaders);
 
         System.out.println("네이버에서 받은 결과 = " + responseBody);
@@ -144,8 +148,8 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     // request를 전송하고 response를 받는 메소드
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private String get(String apiUrl, Map<String, String> requestHeaders){
+        Log.d("Test", "get called");
         HttpURLConnection con = connect(apiUrl);
         try {
             con.setRequestMethod("GET");
@@ -168,6 +172,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
     // Http url Connect 메소드
     private HttpURLConnection connect(String apiUrl){
+        Log.d("Test", "connect called");
         try {
             URL url = new URL(apiUrl);
             return (HttpURLConnection)url.openConnection();
@@ -179,8 +184,8 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     // response의 body를 읽는 메소드
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private String readBody(InputStream body){
+        Log.d("Test", "readBody called");
         InputStreamReader streamReader = new InputStreamReader(body, StandardCharsets.UTF_8);
 
         try (
