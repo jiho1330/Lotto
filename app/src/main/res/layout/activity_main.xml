@@ -29,5 +29,12 @@
         android:text="주변 판매점(우상)"
         android:textSize="20sp" />
 
+    <Button
+        android:id="@+id/btnLottoHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="역대 로또 정보(선규)"
+        android:textSize="20sp" />
+
 
 </LinearLayout>
