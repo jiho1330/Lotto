@@ -17,6 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapViewActivity"></activity>
-    </application>
 
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="s43jhlawk0" />
+    </application>
 </manifest>
