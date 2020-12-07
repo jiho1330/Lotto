@@ -34,7 +34,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        mLocationSource = new FusedLocationSource(this, PERMISSION_REQUEST_CODE);
+        //mLocationSource = new FusedLocationSource(this, PERMISSION_REQUEST_CODE);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         mNaverMap.setLocationSource(mLocationSource);
 
         // 권한확인. 결과는 onRequestPermissionsResult 콜백 매서드 호출
-        ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
+        //ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
 
         CameraPosition cameraPosition = new CameraPosition(
                 new LatLng(33.38, 126.55),  // 위치 지정
@@ -68,7 +68,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         //마커 우선순위
         marker.setZIndex(10);
         //마커 표시
-        marker.setMap(naverMap);
+        //marker.setMap(naverMap);
     }
 
     @Override
