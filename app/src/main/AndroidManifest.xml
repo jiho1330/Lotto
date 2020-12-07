@@ -19,11 +19,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".MapViewActivity"></activity>
         <activity android:name=".LottoHistoryActivity"></activity>
+        <activity android:name=".RandomLottoActivity"></activity>
 
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="s43jhlawk0" />
     </application>
+
 </manifest>
