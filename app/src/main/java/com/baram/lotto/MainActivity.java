@@ -2,6 +2,7 @@ package com.baram.lotto;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.naver.maps.map.MapView;
+
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeSet;
@@ -18,7 +21,7 @@ import java.util.TreeSet;
 public class MainActivity extends AppCompatActivity {
     LinearLayout ll;
     ArrayList<Bitmap> lottoBalls;
-    Button bt;
+    Button bt, btnMapView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,17 @@ public class MainActivity extends AppCompatActivity {
                     ll.addView(lottoBallView);
                 }
 
+            }
+        });
+
+        // 주변 판매점 버튼
+        btnMapView = findViewById(R.id.btnMapView);
+        btnMapView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
+                // 주변 지도보기 화면으로 전환
+                startActivity(mIntent);
             }
         });
     }

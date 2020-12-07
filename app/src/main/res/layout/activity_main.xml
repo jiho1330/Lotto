@@ -22,5 +22,12 @@
         android:text="시작"
         android:textSize="20sp" />
 
+    <Button
+        android:id="@+id/btnMapView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="주변 판매점(우상)"
+        android:textSize="20sp" />
+
 
 </LinearLayout>
