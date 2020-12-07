@@ -21,7 +21,7 @@ import java.util.TreeSet;
 public class MainActivity extends AppCompatActivity {
     LinearLayout ll;
     ArrayList<Bitmap> lottoBalls;
-    Button bt, btnMapView;
+    Button bt, btnMapView, btnLottoHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +103,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
+                // 주변 지도보기 화면으로 전환
+                startActivity(mIntent);
+            }
+        });
+
+        // 역대 로또 정보 버튼
+        btnLottoHistory = findViewById(R.id.btnLottoHistory);
+        btnLottoHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
                 // 주변 지도보기 화면으로 전환
                 startActivity(mIntent);
             }

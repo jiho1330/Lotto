@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapViewActivity"></activity>
+        <activity android:name=".LottoHistoryActivity"></activity>
 
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
