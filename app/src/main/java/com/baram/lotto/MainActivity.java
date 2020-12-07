@@ -21,7 +21,7 @@ import java.util.TreeSet;
 public class MainActivity extends AppCompatActivity {
     LinearLayout ll;
     ArrayList<Bitmap> lottoBalls;
-    Button bt, btnMapView;
+    Button bt, btnMapView, btnLottoHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         //drawable 안에 이미지를 가져오기 위해서 resource 객체 가져오기
         Resources res = getResources();
 
-        for(int i = 0; i < 19; i++){
+        for(int i = 0; i < 45; i++){
 
             //파일명으로 로또볼 이미지를 찾아서 resourceId 값으로 변환
             int tmpId = getResources().getIdentifier(
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Bitmap 객체 생성
             Bitmap bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, tmpId)
-                    ,70,70, false);
+                    ,130,130, false);
 
             //리스트에 Bitmap 객체 추가
             lottoBalls.add(bitmap);
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 //TreeSet의 사이즈가 6이 될때까지 실행
                 while(set.size() < 6){
                     //0~44의 숫자를 생성(리스트의 순서도 0부터 시작하기 때문에 0~44로 설정 했습니다.)
-                    int random = new Random().nextInt(19);
+                    int random = new Random().nextInt(45);
 
                     //TreeSet에 랜덤으로 만들어진 숫자 추가
                     set.add(random);
@@ -103,6 +103,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
+                // 주변 지도보기 화면으로 전환
+                startActivity(mIntent);
+            }
+        });
+
+        // 역대 로또 정보 버튼
+        btnLottoHistory = findViewById(R.id.btnLottoHistory);
+        btnLottoHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
                 // 주변 지도보기 화면으로 전환
                 startActivity(mIntent);
             }
