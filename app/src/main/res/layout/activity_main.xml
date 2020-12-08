@@ -7,19 +7,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/ll"
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
-
     <Button
-        android:id="@+id/bt"
+        android:id="@+id/btnLotto"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="시작"
+        android:text="오늘의 로또번호"
         android:textSize="20sp" />
 
     <Button
