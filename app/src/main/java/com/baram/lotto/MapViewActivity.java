@@ -1,30 +1,24 @@
 package com.baram.lotto;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
-import android.os.Build;
+import androidx.fragment.app.FragmentManager;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.google.gson.JsonParser;
 import com.naver.maps.geometry.LatLng;
-import com.naver.maps.map.CameraPosition;
+import com.naver.maps.geometry.LatLngBounds;
+import com.naver.maps.map.CameraAnimation;
+import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.LocationTrackingMode;
-import com.naver.maps.map.MapView;
+import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
+import com.naver.maps.map.overlay.InfoWindow;
+import com.naver.maps.map.overlay.LocationOverlay;
 import com.naver.maps.map.overlay.Marker;
+import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
 import com.naver.maps.map.util.FusedLocationSource;
 
@@ -45,23 +39,28 @@ import java.util.Map;
 public class MapViewActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private FusedLocationSource locationSource;
-
-    private MapView mapView;
+    private FragmentManager fm;
+    private MapFragment mapFragment;
     private static NaverMap mNaverMap;
-    private FusedLocationSource mLocationSource;
     private UiSettings uiSettings;
-
-    private ToggleButton toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_view);
 
-        //네이버 지도
-        mapView = (MapView) findViewById(R.id.map_view);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
+        fm = getSupportFragmentManager();
+        mapFragment = (MapFragment)fm.findFragmentById(R.id.map_fragment);
+        if (mapFragment == null) {
+            mapFragment = MapFragment.newInstance();
+            fm.beginTransaction().add(R.id.map_fragment, mapFragment).commit();
+        }
+
+        mapFragment.getMapAsync(this);
+
+        // AndroidManifest.xml을 수정하지 않고 API를 호출해 클라이언트 ID를 지정할 수도 있음
+//        NaverMapSdk.getInstance(this).setClient(
+//                new NaverMapSdk.NaverCloudPlatformClient("s43jhlawk0"));
 
         locationSource = new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
     }
@@ -73,18 +72,70 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         // 현위치 버튼 사용여부
         uiSettings.setLocationButtonEnabled(true);
 
+        // 실내지도 활성화
+        naverMap.setIndoorEnabled(true);
+
         // NaverMap 객체 받아서 NaverMap 객체에 위치 소스 지정
-        mNaverMap.setLocationSource(mLocationSource);
+        //naverMap.setLocationSource(locationSource);
+
+        // 위치 추적 모드 : 위치를 추적하면서 카메라의 좌표와 베어링도 따라 움직이는 모드
+        //naverMap.setLocationTrackingMode(LocationTrackingMode.Face);
+
+        // 카메라 영역지정
+        naverMap.setExtent(new LatLngBounds(new LatLng(31.43, 122.37), new LatLng(44.35, 132)));
+
+        // 최소 및 최대 줌 지정
+        naverMap.setMinZoom(5.0);
+        naverMap.setMaxZoom(20.0);
+
+        CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(37.566678, 126.978409))
+                .animate(CameraAnimation.Linear);
+        naverMap.moveCamera(cameraUpdate);
+
+
+        LocationOverlay locationOverlay = naverMap.getLocationOverlay();
+        Log.d("Test", locationOverlay.getPosition().latitude + " : " + locationOverlay.getPosition().longitude);
 
         Marker marker = new Marker();
         marker.setPosition(new LatLng(37.5670135, 126.9783740));
-        marker.setOnClickListener(overlay -> {
-            Toast.makeText(getApplicationContext(), "마커 클릭됨", Toast.LENGTH_SHORT).show();
-            return true;
-        });
+//        marker.setOnClickListener(overlay -> {
+//            Toast.makeText(getApplicationContext(), "마커 클릭됨", Toast.LENGTH_SHORT).show();
+//            return true;
+//        });
         marker.setMap(naverMap);
 
-        searchPlace("로또");
+        InfoWindow infoWindow = new InfoWindow();
+        infoWindow.setAdapter(new InfoWindow.DefaultTextAdapter(getApplicationContext()) {
+            @NonNull
+            @Override
+            public CharSequence getText(@NonNull InfoWindow infoWindow) {
+                return "복권 판매점";
+            }
+        });
+
+        // 지도를 클릭하면 정보 창을 닫음
+        naverMap.setOnMapClickListener((coord, point) -> {
+            infoWindow.close();
+        });
+
+        // 마커를 클릭하면:
+        Overlay.OnClickListener listener = overlay -> {
+            Marker mMarker = (Marker)overlay;
+
+            if (mMarker.getInfoWindow() == null) {
+                // 현재 마커에 정보 창이 열려있지 않을 경우 엶
+                infoWindow.open(mMarker);
+            } else {
+                // 이미 현재 마커에 정보 창이 열려있을 경우 닫음
+                infoWindow.close();
+            }
+
+            return true;
+        };
+
+        marker.setOnClickListener(listener);
+
+        //searchPlace("로또");
 //        CameraPosition cameraPosition = new CameraPosition(
 //                new LatLng(33.38, 126.55),  // 위치 지정
 //                9                           // 줌 레벨
@@ -94,8 +145,7 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (locationSource.onRequestPermissionsResult(
-                requestCode, permissions, grantResults)) {
+        if (locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
             if (!locationSource.isActivated()) { // 권한 거부됨
                 mNaverMap.setLocationTrackingMode(LocationTrackingMode.None);
             }
@@ -202,53 +252,5 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
         }
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        mapView.onStart();
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        mapView.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onLowMemory()
-    {
-        super.onLowMemory();
-        mapView.onLowMemory();
     }
 }
