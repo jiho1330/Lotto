@@ -3,20 +3,9 @@ package com.baram.lotto;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-
-import com.naver.maps.map.MapView;
-
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity {
     Button btnLotto, btnMapView, btnLottoHistory;

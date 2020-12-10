@@ -2,10 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.baram.lotto">
     <!--위치 권한-->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!--인터넷 권한-->
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,8 +27,8 @@
         <activity android:name=".RandomLottoActivity"></activity>
 
         <meta-data
-            android:name="com.naver.maps.map.CLIENT_ID"
-            android:value="s43jhlawk0" />
+            android:name="com.kakao.sdk.AppKey"
+            android:value="417dc556c2520c16df729078502d9464"/>
     </application>
 
 </manifest>

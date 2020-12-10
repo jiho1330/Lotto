@@ -2,255 +2,301 @@ package com.baram.lotto;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.naver.maps.geometry.LatLng;
-import com.naver.maps.geometry.LatLngBounds;
-import com.naver.maps.map.CameraAnimation;
-import com.naver.maps.map.CameraUpdate;
-import com.naver.maps.map.LocationTrackingMode;
-import com.naver.maps.map.MapFragment;
-import com.naver.maps.map.NaverMap;
-import com.naver.maps.map.OnMapReadyCallback;
-import com.naver.maps.map.UiSettings;
-import com.naver.maps.map.overlay.InfoWindow;
-import com.naver.maps.map.overlay.LocationOverlay;
-import com.naver.maps.map.overlay.Marker;
-import com.naver.maps.map.overlay.Overlay;
-import com.naver.maps.map.overlay.OverlayImage;
-import com.naver.maps.map.util.FusedLocationSource;
+import net.daum.mf.map.api.MapPOIItem;
+import net.daum.mf.map.api.MapPoint;
+import net.daum.mf.map.api.MapReverseGeoCoder;
+import net.daum.mf.map.api.MapView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.Permission;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class MapViewActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
-    private FusedLocationSource locationSource;
-    private FragmentManager fm;
-    private MapFragment mapFragment;
-    private static NaverMap mNaverMap;
-    private UiSettings uiSettings;
+
+public class MapViewActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener,
+        MapReverseGeoCoder.ReverseGeoCodingResultListener, MapView.POIItemEventListener {
+    private static final String LOG_TAG = "MapViewActivity";
+    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
+    private static final int PERMISSIONS_REQUEST_CODE = 100;
+    String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+    private MapView mapView;
+    private List<String> UrlList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_view);
 
-        fm = getSupportFragmentManager();
-        mapFragment = (MapFragment)fm.findFragmentById(R.id.map_fragment);
-        if (mapFragment == null) {
-            mapFragment = MapFragment.newInstance();
-            fm.beginTransaction().add(R.id.map_fragment, mapFragment).commit();
+        mapView = new MapView(this);
+        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
+        mapViewContainer.addView(mapView);
+        mapView.setCurrentLocationEventListener(this);
+        mapView.removeAllPOIItems();
+        mapView.setPOIItemEventListener(this);
+
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        } else {
+
+            checkRunTimePermission();
         }
 
-        mapFragment.getMapAsync(this);
-
-        // AndroidManifest.xml을 수정하지 않고 API를 호출해 클라이언트 ID를 지정할 수도 있음
-//        NaverMapSdk.getInstance(this).setClient(
-//                new NaverMapSdk.NaverCloudPlatformClient("s43jhlawk0"));
-
-        locationSource = new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
+        callPlaceList();
     }
 
+    public void MapMarker(String place_name, String place_url, double startX, double startY) {
+        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( startY, startX );
+        mapView.setMapCenterPoint(mapPoint, true ); //true면 앱 실행 시 애니메이션 효과가 나오고 false면 애니메이션이 나오지않음.
+        MapPOIItem marker = new MapPOIItem();
+        marker.setItemName(place_name); // 마커 클릭 시 컨테이너에 담길 내용
+        marker.setMapPoint(mapPoint); // 기본으로 제공하는 BluePin 마커 모양.
+        marker.setMarkerType( MapPOIItem.MarkerType.RedPin ); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+        marker.setSelectedMarkerType( MapPOIItem.MarkerType.BluePin );
+        mapView.addPOIItem( marker ); }
+
     @Override
-    public void onMapReady(@NonNull NaverMap naverMap) {
-        this.mNaverMap = naverMap;
-        uiSettings = naverMap.getUiSettings();
-        // 현위치 버튼 사용여부
-        uiSettings.setLocationButtonEnabled(true);
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+        mapView.setShowCurrentLocationMarker(false);
+    }
 
-        // 실내지도 활성화
-        naverMap.setIndoorEnabled(true);
-
-        // NaverMap 객체 받아서 NaverMap 객체에 위치 소스 지정
-        //naverMap.setLocationSource(locationSource);
-
-        // 위치 추적 모드 : 위치를 추적하면서 카메라의 좌표와 베어링도 따라 움직이는 모드
-        //naverMap.setLocationTrackingMode(LocationTrackingMode.Face);
-
-        // 카메라 영역지정
-        naverMap.setExtent(new LatLngBounds(new LatLng(31.43, 122.37), new LatLng(44.35, 132)));
-
-        // 최소 및 최대 줌 지정
-        naverMap.setMinZoom(5.0);
-        naverMap.setMaxZoom(20.0);
-
-        CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(37.566678, 126.978409))
-                .animate(CameraAnimation.Linear);
-        naverMap.moveCamera(cameraUpdate);
-
-
-        LocationOverlay locationOverlay = naverMap.getLocationOverlay();
-        Log.d("Test", locationOverlay.getPosition().latitude + " : " + locationOverlay.getPosition().longitude);
-
-        Marker marker = new Marker();
-        marker.setPosition(new LatLng(37.5670135, 126.9783740));
-//        marker.setOnClickListener(overlay -> {
-//            Toast.makeText(getApplicationContext(), "마커 클릭됨", Toast.LENGTH_SHORT).show();
-//            return true;
-//        });
-        marker.setMap(naverMap);
-
-        InfoWindow infoWindow = new InfoWindow();
-        infoWindow.setAdapter(new InfoWindow.DefaultTextAdapter(getApplicationContext()) {
-            @NonNull
+    private void callPlaceList() {
+        AddrSearchRepository.getINSTANCE().getAddressList("복권", 1, 15, new AddrSearchRepository.AddressResponseListener() {
             @Override
-            public CharSequence getText(@NonNull InfoWindow infoWindow) {
-                return "복권 판매점";
+            public void onSuccessResponse(Location locationData) {
+                Log.d(LOG_TAG, "Total: " +  locationData.meta.getTotal_count());
+                Toast.makeText(getApplicationContext(), "조회 건 수: " +  locationData.meta.getTotal_count(), Toast.LENGTH_SHORT).show();
+                //initAdapter(locationData);
+
+                int tag_count = 1;
+                for (Location.Document doc:locationData.documentsList) {
+
+                    Log.d(LOG_TAG,  "place_name: " + doc.getPlace_name() + " x: " + doc.getX() + " y: " + doc.getY());
+                    UrlList.add(doc.getPlace_url());
+                    MapMarker(doc.getPlace_name(), doc.getPlace_url(), Double.parseDouble(doc.getX()), Double.parseDouble(doc.getY()));
+//                    MapPoint mapPoint = MapPoint.mapPointWithCONGCoord(Double.parseDouble(doc.getX()), Double.parseDouble(doc.getY()));
+//                    MapPOIItem customMarker = new MapPOIItem();
+//                    customMarker.setItemName(doc.getPlace_name());
+//                    customMarker.setTag(mapView.getPOIItems().length);
+//                    customMarker.setMapPoint(mapPoint);
+//                    customMarker.setMarkerType(MapPOIItem.MarkerType.CustomImage); // 마커타입을 커스텀 마커로 지정.
+//                    customMarker.setCustomImageResourceId(R.drawable.ic_baseline_place_24); // 마커 이미지.
+//                    //customMarker.setCustomImageAutoscale(false); // hdpi, xhdpi 등 안드로이드 플랫폼의 스케일을 사용할 경우 지도 라이브러리의 스케일 기능을 꺼줌.
+//                    //customMarker.setCustomImageAnchor(0.5f, 1.0f); // 마커 이미지중 기준이 되는 위치(앵커포인트) 지정 - 마커 이미지 좌측 상단 기준 x(0.0f ~ 1.0f), y(0.0f ~ 1.0f) 값.
+//                    mapView.addPOIItem(customMarker);
+                }
+            }
+
+            @Override
+            public void onFailResponse() {
+                Toast.makeText(getApplicationContext(), "데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 지도를 클릭하면 정보 창을 닫음
-        naverMap.setOnMapClickListener((coord, point) -> {
-            infoWindow.close();
-        });
-
-        // 마커를 클릭하면:
-        Overlay.OnClickListener listener = overlay -> {
-            Marker mMarker = (Marker)overlay;
-
-            if (mMarker.getInfoWindow() == null) {
-                // 현재 마커에 정보 창이 열려있지 않을 경우 엶
-                infoWindow.open(mMarker);
-            } else {
-                // 이미 현재 마커에 정보 창이 열려있을 경우 닫음
-                infoWindow.close();
-            }
-
-            return true;
-        };
-
-        marker.setOnClickListener(listener);
-
-        //searchPlace("로또");
-//        CameraPosition cameraPosition = new CameraPosition(
-//                new LatLng(33.38, 126.55),  // 위치 지정
-//                9                           // 줌 레벨
-//        );
-//        naverMap.setCameraPosition(cameraPosition);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
-            if (!locationSource.isActivated()) { // 권한 거부됨
-                mNaverMap.setLocationTrackingMode(LocationTrackingMode.None);
-            }
-            return;
-        }
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    // 마커 표시
-    private void setMark(Marker marker, double lat, double lng, int resourceID)
-    {
-        //원근감 표시
-        marker.setIconPerspectiveEnabled(false);
-        //아이콘 지정
-        marker.setIcon(OverlayImage.fromResource(resourceID));
-        //마커의 투명도
-        marker.setAlpha(0.8f);
-        //마커 위치
-        marker.setPosition(new LatLng(lat, lng));
-        //마커 우선순위
-        marker.setZIndex(10);
-        //마커 표시
-        marker.setMap(mNaverMap);
-    }
-
-    // 네이버 장소 검색
-    public String searchPlace(String keyword){
+    public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
         try {
-            keyword = URLEncoder.encode(keyword, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("encoding fail!",e);
-        }
-
-        String apiURL = "https://openapi.naver.com/v1/search/local.json?query="+keyword+"&display=20&start=1&sort=random";    // json 결과
-        //String apiURL = "https://openapi.naver.com/v1/search/blog.xml?query="+ text; // xml 결과
-
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("X-NCP-APIGW-API-KEY-ID", "s43jhlawk0");
-        requestHeaders.put("X-NCP-APIGW-API-KEY", "UexfyjgnocdVBePjvvgvqf8zs8FYcJ25h3v83LeZ");
-//        requestHeaders.put("X-Naver-Client-Id", "s43jhlawk0");
-//        requestHeaders.put("X-Naver-Client-Secret", "UexfyjgnocdVBePjvvgvqf8zs8FYcJ25h3v83LeZ");
-        String responseBody = get(apiURL,requestHeaders);
-
-        System.out.println("네이버에서 받은 결과 = " + responseBody);
-        System.out.println("-----------------------------------------");
-
-        return responseBody;
-//        return convertData(responseBody);
-    }
-
-    // request를 전송하고 response를 받는 메소드
-    private String get(String apiUrl, Map<String, String> requestHeaders){
-        Log.d("Test", "get called");
-        HttpURLConnection con = connect(apiUrl);
-        try {
-            con.setRequestMethod("GET");
-            for(Map.Entry<String, String> header :requestHeaders.entrySet()) {
-                con.setRequestProperty(header.getKey(), header.getValue());
-            }
-
-            int responseCode = con.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
-                return readBody(con.getInputStream());
-            } else { // 에러 발생
-                return readBody(con.getErrorStream());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("API 요청과 응답 실패", e);
-        } finally {
-            con.disconnect();
+            Log.d(LOG_TAG, "Tag: " + mapPOIItem.getTag());
+            Toast.makeText(getApplicationContext(), "URL: " + UrlList.get(mapPOIItem.getTag()), Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    // Http url Connect 메소드
-    private HttpURLConnection connect(String apiUrl){
-        Log.d("Test", "connect called");
-        try {
-            URL url = new URL(apiUrl);
-            return (HttpURLConnection)url.openConnection();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("API URL이 잘못되었습니다. : " + apiUrl, e);
-        } catch (IOException e) {
-            throw new RuntimeException("연결이 실패했습니다. : " + apiUrl, e);
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+
+    }
+
+    @Override
+    public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
+        MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
+        Log.i(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
+    }
+
+    @Override
+    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdateFailed(MapView mapView) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdateCancelled(MapView mapView) {
+
+    }
+
+    @Override
+    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
+        mapReverseGeoCoder.toString();
+        onFinishReverseGeoCoding(s);
+    }
+
+    @Override
+    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {
+        onFinishReverseGeoCoding("Fail");
+    }
+
+    private void onFinishReverseGeoCoding(String result) {
+        Toast.makeText(MapViewActivity.this, "Reverse Geo-coding : " + result, Toast.LENGTH_SHORT).show();
+    }
+
+    /*
+     * ActivityCompat.requestPermissions를 사용한 퍼미션 요청의 결과를 리턴받는 메소드입니다.
+     */
+    @Override
+    public void onRequestPermissionsResult(int permsRequestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grandResults) {
+
+        if ( permsRequestCode == PERMISSIONS_REQUEST_CODE && grandResults.length == REQUIRED_PERMISSIONS.length) {
+            // 요청 코드가 PERMISSIONS_REQUEST_CODE 이고, 요청한 퍼미션 개수만큼 수신되었다면
+            boolean check_result = true;
+
+            // 모든 퍼미션을 허용했는지 체크합니다.
+            for (int result : grandResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    check_result = false;
+                    break;
+                }
+            }
+
+            if ( check_result ) {
+                Log.d("@@@", "start");
+                //위치 값을 가져올 수 있음
+                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
+            }
+            else {
+                // 거부한 퍼미션이 있다면 앱을 사용할 수 없는 이유를 설명해주고 앱을 종료합니다.2 가지 경우가 있습니다.
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])) {
+                    Toast.makeText(MapViewActivity.this, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요.", Toast.LENGTH_LONG).show();
+                    finish();
+                } else {
+                    Toast.makeText(MapViewActivity.this, "퍼미션이 거부되었습니다. 설정(앱 정보)에서 퍼미션을 허용해야 합니다. ", Toast.LENGTH_LONG).show();
+                }
+            }
+
         }
     }
 
-    // response의 body를 읽는 메소드
-    private String readBody(InputStream body){
-        Log.d("Test", "readBody called");
-        InputStreamReader streamReader = new InputStreamReader(body, StandardCharsets.UTF_8);
+    void checkRunTimePermission() {
+        //런타임 퍼미션 처리
+        // 1. 위치 퍼미션을 가지고 있는지 체크합니다.
+        int hasFineLocationPermission = ContextCompat.checkSelfPermission(MapViewActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
 
-        try (
-                BufferedReader lineReader = new BufferedReader(streamReader)
-        ) {
-            StringBuilder responseBody = new StringBuilder();
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED ) {
 
-            String line;
-            while ((line = lineReader.readLine()) != null) {
-                responseBody.append(line);
+            // 2. 이미 퍼미션을 가지고 있다면
+            // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식합니다.)
+
+            // 3.  위치 값을 가져올 수 있음
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+            //mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
+
+        } else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요합니다. 2가지 경우(3-1, 4-1)가 있습니다.
+
+            // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MapViewActivity.this, REQUIRED_PERMISSIONS[0])) {
+
+                // 3-2. 요청을 진행하기 전에 사용자가에게 퍼미션이 필요한 이유를 설명해줄 필요가 있습니다.
+                Toast.makeText(MapViewActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
+                // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionResult에서 수신됩니다.
+                ActivityCompat.requestPermissions(MapViewActivity.this, REQUIRED_PERMISSIONS,
+                        PERMISSIONS_REQUEST_CODE);
+
+            } else {
+                // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 합니다.
+                // 요청 결과는 onRequestPermissionResult에서 수신됩니다.
+                ActivityCompat.requestPermissions(MapViewActivity.this, REQUIRED_PERMISSIONS,
+                        PERMISSIONS_REQUEST_CODE);
             }
 
-            return responseBody.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
         }
+
+    }
+
+    //여기부터는 GPS 활성화를 위한 메소드들
+    private void showDialogForLocationServiceSetting() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapViewActivity.this);
+        builder.setTitle("위치 서비스 비활성화");
+        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
+                + "위치 설정을 수정하실래요?");
+        builder.setCancelable(true);
+        builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                Intent callGPSSettingIntent
+                        = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivityForResult(callGPSSettingIntent, GPS_ENABLE_REQUEST_CODE);
+            }
+        });
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        builder.create().show();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case GPS_ENABLE_REQUEST_CODE:
+                //사용자가 GPS 활성 시켰는지 검사
+                if (checkLocationServicesStatus()) {
+                    if (checkLocationServicesStatus()) {
+
+                        Log.d("@@@", "onActivityResult : GPS 활성화 되있음");
+                        checkRunTimePermission();
+                        return;
+                    }
+                }
+                break;
+        }
+    }
+
+    public boolean checkLocationServicesStatus() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 }
