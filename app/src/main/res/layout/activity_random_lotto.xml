@@ -5,14 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
-
-    <LinearLayout
-        android:id="@+id/ll"
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+    tools:context=".MainActivity"
+    android:weightSum="1">
 
     <Button
         android:id="@+id/btnRandom"
@@ -20,8 +14,52 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="오늘의 로또번호"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        />
 
+    <LinearLayout
+        android:id="@+id/ll"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
 
+    <LinearLayout
+        android:id="@+id/ll1"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
+
+    <LinearLayout
+        android:id="@+id/ll2"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
+
+    <LinearLayout
+        android:id="@+id/ll3"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
+
+    <LinearLayout
+        android:id="@+id/ll4"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
 
 </LinearLayout>
