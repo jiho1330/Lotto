@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Lotto</string>
+    <string name="admob_app_id">ca-app-pub-5786180275037735~4030834760</string>
+    <string name="banner_ad_unit_id_for_test">ca-app-pub-5786180275037735/5315996274</string>
 </resources>
