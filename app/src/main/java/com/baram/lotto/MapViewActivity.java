@@ -7,17 +7,27 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import net.daum.mf.map.api.CalloutBalloonAdapter;
+import net.daum.mf.map.api.CameraUpdateFactory;
+import net.daum.mf.map.api.MapCircle;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
+import net.daum.mf.map.api.MapPointBounds;
 import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
@@ -31,10 +41,12 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     private static final String LOG_TAG = "MapViewActivity";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
+    private static final int RADIUS = 2000;
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.ACCESS_FINE_LOCATION};
 
     private MapView mapView;
-    private List<String> UrlList = new ArrayList<>();
+    private List<Location.Document> DocList;
+    private int totalCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,61 +56,62 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
         mapView = new MapView(this);
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
-        mapView.setCurrentLocationEventListener(this);
-        mapView.removeAllPOIItems();
-        mapView.setPOIItemEventListener(this);
+        mapView.setCurrentLocationEventListener(this);  // 현재위치 이벤트 리스너 설정
+        mapView.removeAllPOIItems();    // 모든 Marker 제거
+        mapView.removeAllCircles();     // 모든 Circle 제거
+        mapView.setPOIItemEventListener(this);  // Marker 이벤트 설정
+        mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter());    // 콜아웃 벌룬 어뎁터 설정
+        
+        // 검색 결과를 담을 리스트
+        DocList = new ArrayList<>();
 
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
         } else {
-
             checkRunTimePermission();
         }
 
-        callPlaceList();
     }
 
-    public void MapMarker(String place_name, String place_url, double startX, double startY) {
+    public void MapMarker(String place_name, double startX, double startY) {
         MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( startY, startX );
-        mapView.setMapCenterPoint(mapPoint, true ); //true면 앱 실행 시 애니메이션 효과가 나오고 false면 애니메이션이 나오지않음.
         MapPOIItem marker = new MapPOIItem();
+        marker.setTag(mapView.getPOIItems().length);
         marker.setItemName(place_name); // 마커 클릭 시 컨테이너에 담길 내용
         marker.setMapPoint(mapPoint); // 기본으로 제공하는 BluePin 마커 모양.
         marker.setMarkerType( MapPOIItem.MarkerType.RedPin ); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-        marker.setSelectedMarkerType( MapPOIItem.MarkerType.BluePin );
-        mapView.addPOIItem( marker ); }
+        marker.setSelectedMarkerType( MapPOIItem.MarkerType.BluePin ); // 마커를 클릭했을때, 기본으로 제공하는 BluePin 마커 모양.
+        mapView.addPOIItem(marker);
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
         mapView.setShowCurrentLocationMarker(false);
+        DocList = null;
     }
 
-    private void callPlaceList() {
-        AddrSearchRepository.getINSTANCE().getAddressList("복권", 1, 15, new AddrSearchRepository.AddressResponseListener() {
+    private void callPlaceList(int page, double x, double y) {
+        AddrSearchRepository.getINSTANCE().getAddressList(page, x, y, new AddrSearchRepository.AddressResponseListener() {
             @Override
             public void onSuccessResponse(Location locationData) {
                 Log.d(LOG_TAG, "Total: " +  locationData.meta.getTotal_count());
-                Toast.makeText(getApplicationContext(), "조회 건 수: " +  locationData.meta.getTotal_count(), Toast.LENGTH_SHORT).show();
+                if (totalCount == 0) {
+                    totalCount = locationData.meta.getTotal_count();
+                }
+                Toast.makeText(getApplicationContext(), String.format("반경 %dm 내 판매점 수: %d", RADIUS, totalCount), Toast.LENGTH_SHORT).show();
                 //initAdapter(locationData);
 
-                int tag_count = 1;
                 for (Location.Document doc:locationData.documentsList) {
+                    Log.d(LOG_TAG,  mapView.getPOIItems().length + ")place_name: " + doc.getPlace_name() + " x: " + doc.getX() + " y: " + doc.getY());
+                    DocList.add(doc);
+                    MapMarker(doc.getPlace_name(), Double.parseDouble(doc.getX()), Double.parseDouble(doc.getY()));
+                }
 
-                    Log.d(LOG_TAG,  "place_name: " + doc.getPlace_name() + " x: " + doc.getX() + " y: " + doc.getY());
-                    UrlList.add(doc.getPlace_url());
-                    MapMarker(doc.getPlace_name(), doc.getPlace_url(), Double.parseDouble(doc.getX()), Double.parseDouble(doc.getY()));
-//                    MapPoint mapPoint = MapPoint.mapPointWithCONGCoord(Double.parseDouble(doc.getX()), Double.parseDouble(doc.getY()));
-//                    MapPOIItem customMarker = new MapPOIItem();
-//                    customMarker.setItemName(doc.getPlace_name());
-//                    customMarker.setTag(mapView.getPOIItems().length);
-//                    customMarker.setMapPoint(mapPoint);
-//                    customMarker.setMarkerType(MapPOIItem.MarkerType.CustomImage); // 마커타입을 커스텀 마커로 지정.
-//                    customMarker.setCustomImageResourceId(R.drawable.ic_baseline_place_24); // 마커 이미지.
-//                    //customMarker.setCustomImageAutoscale(false); // hdpi, xhdpi 등 안드로이드 플랫폼의 스케일을 사용할 경우 지도 라이브러리의 스케일 기능을 꺼줌.
-//                    //customMarker.setCustomImageAnchor(0.5f, 1.0f); // 마커 이미지중 기준이 되는 위치(앵커포인트) 지정 - 마커 이미지 좌측 상단 기준 x(0.0f ~ 1.0f), y(0.0f ~ 1.0f) 값.
-//                    mapView.addPOIItem(customMarker);
+                // 마지막 페이지가 아니면
+                if (!locationData.meta.isIs_end()) {
+                    callPlaceList(page + 1, x, y);
                 }
             }
 
@@ -115,7 +128,6 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
         try {
             Log.d(LOG_TAG, "Tag: " + mapPOIItem.getTag());
-            Toast.makeText(getApplicationContext(), "URL: " + UrlList.get(mapPOIItem.getTag()), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,7 +135,19 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
 
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+        int tag = mapPOIItem.getTag();
+        String phone_number = DocList.get(tag).getPhone();
+        if (phone_number.equals("")){
+            Toast.makeText(getApplicationContext(), "전화번호가 없습니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "전화번호가 복사되었습니다.", Toast.LENGTH_SHORT).show();
 
+            // 클립보드에 저장
+            ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            ClipData clipData = ClipData.newPlainText("phone", phone_number);
+            clipboardManager.setPrimaryClip(clipData);
+        }
+        
     }
 
     @Override
@@ -140,6 +164,27 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         Log.i(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
+
+        // 현재 위치에 원이 없는 경우
+        if (mapView.getCircles().length == 0) {
+            // 현재 위치를 기준으로 원을 그림
+            MapCircle mCircle = new MapCircle(
+                MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude), // center
+                    RADIUS, // radius
+                    Color.argb(220, 255, 255, 102), // strokeColor
+                    Color.argb(100, 255, 255, 204) // fillColor
+            );
+            mCircle.setTag(0);
+            mapView.addCircle(mCircle);
+
+            // Circle 전체가 맵에 나오게 설정
+            MapPointBounds[] mapPointBoundsArray = { mCircle.getBound()};
+            MapPointBounds mapPointBounds = new MapPointBounds(mapPointBoundsArray);
+            int padding = 50; // px 여백
+            mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding));
+
+            callPlaceList(1, mapPointGeo.longitude, mapPointGeo.latitude);
+        }
     }
 
     @Override
@@ -223,7 +268,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식합니다.)
 
             // 3.  위치 값을 가져올 수 있음
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
             //mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
 
         } else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요합니다. 2가지 경우(3-1, 4-1)가 있습니다.
@@ -298,5 +343,34 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    // CalloutBalloonAdapter 인터페이스 구현
+    class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
+        private final View mCalloutBalloon;
+
+        public CustomCalloutBalloonAdapter() {
+            mCalloutBalloon = getLayoutInflater().inflate(R.layout.custom_callout_balloon, null);
+        }
+
+        @Override
+        public View getCalloutBalloon(MapPOIItem mapPOIItem) {
+            int tag = mapPOIItem.getTag();
+            Location.Document document = DocList.get(tag);
+
+            ((ImageView) mCalloutBalloon.findViewById(R.id.badge)).setImageResource(R.drawable.ic_baseline_place_24);
+            ((TextView) mCalloutBalloon.findViewById(R.id.title)).setText(mapPOIItem.getItemName());
+            ((TextView) mCalloutBalloon.findViewById(R.id.desc)).setText(document.getDistance() + "m");
+            ((TextView) mCalloutBalloon.findViewById(R.id.road_address_name)).setText(document.getRoad_address_name());
+            ((TextView) mCalloutBalloon.findViewById(R.id.address_name)).setText(document.getAddress_name());
+            ((TextView) mCalloutBalloon.findViewById(R.id.phone_number)).setText(document.getPhone());
+
+            return mCalloutBalloon;
+        }
+
+        @Override
+        public View getPressedCalloutBalloon(MapPOIItem poiItem) {
+            return null;
+        }
     }
 }

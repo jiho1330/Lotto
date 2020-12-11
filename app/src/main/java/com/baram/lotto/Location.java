@@ -14,16 +14,22 @@ public class Location {
     public static class Document {
         @SerializedName("address")
         private Address address;
-        @SerializedName("address_name")
+        @SerializedName("address_name") // 지번
         private String address_name;
+        @SerializedName("road_address_name")    // 도로명
+        private String road_address_name;
         @SerializedName("x")        //longitude
         private String x;
         @SerializedName("y")        //latitude
         private String y;
-        @SerializedName("place_name")
+        @SerializedName("place_name")   // 상호명
         private String place_name;
-        @SerializedName("place_url")
+        @SerializedName("place_url")    // 장소 URL
         private String place_url;
+        @SerializedName("distance") // 거리
+        private int distance;
+        @SerializedName("phone")    // 전화번호
+        private String phone;
 
         public static class Address {
             @SerializedName("h_code")
@@ -41,50 +47,24 @@ public class Location {
         public Address getAddress() {
             return address;
         }
-
-        public void setAddress(Address address) {
-            this.address = address;
-        }
-
         public String getAddress_name() {
             return address_name;
         }
-
-        public void setAddress_name(String address_name) {
-            this.address_name = address_name;
-        }
-
+        public String getRoad_address_name() { return road_address_name; }
         public String getX() {
             return x;
         }
-
-        public void setX(String x) {
-            this.x = x;
-        }
-
         public String getY() {
             return y;
         }
-
-        public void setY(String y) {
-            this.y = y;
-        }
-
         public String getPlace_name() {
             return place_name;
         }
-
-        public void setPlace_name(String place_name) {
-            this.place_name = place_name;
-        }
-
         public String getPlace_url() {
             return place_url;
         }
-
-        public void setPlace_url(String place_url) {
-            this.place_url = place_url;
-        }
+        public int getDistance() { return distance; }
+        public String getPhone() { return phone; }
     }
 
 

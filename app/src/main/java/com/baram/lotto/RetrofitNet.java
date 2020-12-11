@@ -22,7 +22,7 @@ public class RetrofitNet {
     public AddrSearchService getSearchAddrService(){
         Retrofit kakaoRetrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://dapi.kakao.com/")
+                .baseUrl(AddrSearchService.BASE_URL)
                 .build();
 
         return kakaoRetrofit.create(AddrSearchService.class);
