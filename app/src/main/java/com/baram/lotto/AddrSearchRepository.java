@@ -19,9 +19,9 @@ public class AddrSearchRepository {
         return INSTANCE;
     }
 
-    public void getAddressList(int page, double x, double y, AddressResponseListener listener) {
+    public void getAddressList(int page, double x, double y, int radius, AddressResponseListener listener) {
         Call<Location> call = RetrofitNet.getRetrofit().getSearchAddrService()
-                .searchAddressList("복권", page, x, y, 2000, "KakaoAK " + AddrSearchService.KAKAO_AK);
+                .searchAddressList("복권", page, x, y, radius, "KakaoAK " + AddrSearchService.KAKAO_AK);
         call.enqueue(new Callback<Location>() {
             @Override
             public void onResponse(Call<Location> call, Response<Location> response) {

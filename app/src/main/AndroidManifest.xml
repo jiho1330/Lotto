@@ -22,7 +22,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MapViewActivity"></activity>
+        <activity android:name=".MapViewActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+        </activity>
         <activity android:name=".LottoHistoryActivity"></activity>
         <activity android:name=".RandomLottoActivity"></activity>
 

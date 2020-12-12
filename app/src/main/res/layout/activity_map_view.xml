@@ -1,23 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
 
+    <!-- MapView -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#4DA6A6A6"
+        android:padding="5dp"
         android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="범위: 1000(m)"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <SeekBar
+                android:id="@+id/sbRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="3000"
+                android:min="100"
+                android:progress="1000"
+                android:saveEnabled="true"
+                android:thumb="@drawable/ic_baseline_place_24" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnFind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="조회" />
     </LinearLayout>
 
-    <!-- MapView -->
     <RelativeLayout
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-<!--    <net.daum.mf.map.api.MapView-->
-<!--        android:id="@+id/map_view"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent" />-->
+    <!--    <net.daum.mf.map.api.MapView-->
+    <!--        android:id="@+id/map_view"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent" />-->
 </LinearLayout>

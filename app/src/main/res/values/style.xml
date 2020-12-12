@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorOnPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/white</item>
+    </style>
+</resources>
