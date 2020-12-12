@@ -9,9 +9,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#4DA6A6A6"
-        android:padding="5dp"
-        android:orientation="horizontal">
+        android:background="#80A6A6A6"
+        android:orientation="horizontal"
+        android:padding="5dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -39,11 +39,6 @@
                 android:thumb="@drawable/ic_baseline_place_24" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnFind"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="조회" />
     </LinearLayout>
 
     <RelativeLayout

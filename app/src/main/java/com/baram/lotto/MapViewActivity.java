@@ -73,22 +73,14 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) { }
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) { }
-        });
-
-        Button btnFind = findViewById(R.id.btnFind);
-        btnFind.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            public void onStopTrackingTouch(SeekBar seekBar) {
                 if (mLocation != null) {
                     MapPoint.GeoCoordinate mapPointGeo = mLocation.getMapPointGeoCoord();
                     CircleMaker(mapPointGeo.longitude, mapPointGeo.latitude);
                     callPlaceList(1, mapPointGeo.longitude, mapPointGeo.latitude);
+                } else {
+                    showToastMessage("현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT);
                 }
-                else {
-                    showToastMessage("현 위치를 찾을 수 없습니다. 잠시 후 재시도 하십시오.", Toast.LENGTH_SHORT);
-                }
-
             }
         });
 
