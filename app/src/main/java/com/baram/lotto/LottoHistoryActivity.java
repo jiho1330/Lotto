@@ -9,6 +9,12 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class LottoHistoryActivity extends AppCompatActivity {
@@ -38,7 +44,36 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryView = findViewById(R.id.btnLottoHistoryView);
         btnLottoHistoryView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {   //여기서 클릭 시 행동을 결정
+            public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
+
+                new Thread(){
+                    @Override
+                    public void run(){
+                        Document doc = null;
+                        try
+                        {
+                            String LottoBaseURL = "https://www.dhlottery.co.kr/gameResult.do?method=byWin&drwNo=";      //회차별 당첨번호 조회 URL
+                            int Round = 1;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
+                            String LottoRoundURL = LottoBaseURL + Integer.toString(Round);                              //URL 생성
+                            doc = Jsoup.connect(LottoRoundURL).get();
+
+                            Elements eRound = doc.select("#dwrNoList");
+                            String TotalRound = eRound.text();
+
+                            for(int i = 0; i < Integer.parseInt(TotalRound); i++)
+                            {
+                                Round = i;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
+                                LottoRoundURL = LottoBaseURL + Integer.toString(Round);
+                                doc = Jsoup.connect(LottoRoundURL).get();
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+
                 String text = "test";        // EditText에 입력된 문자열값을 얻기
                 items.add(text);                          // items 리스트에 입력된 문자열 추가
                 items.add("Sunday");
