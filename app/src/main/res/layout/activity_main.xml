@@ -1,72 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    xmlns:ads2="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btnLotto"
-        android:gravity="center"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="오늘의 로또번호"
-        android:textSize="20sp" />
+        android:layout_weight="1"
+        android:background="#C8C8C8"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnMapView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="주변 판매점(우상)"
-        android:textSize="20sp" />
+        <Button
+            android:id="@+id/btnLotto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_round_black"
+            android:gravity="center"
+            android:text="오늘의 로또번호"
+            android:textSize="24sp" />
 
-    <Button
-        android:id="@+id/btnLottoHistory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="역대 로또 정보(선규)"
-        android:textSize="20sp" />
+        <Button
+            android:id="@+id/btnMapView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_round"
+            android:text="주변 판매점(우상)"
+            android:textSize="24sp" />
 
-<!--    <com.google.android.gms.ads.AdView-->
-<!--        xmlns:ads="http://schemas.android.com/apk/res-auto"-->
-<!--        android:id="@+id/adView"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_centerHorizontal="true"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        ads:adSize="BANNER"-->
-<!--        ads:adUnitId="@string/banner_ad_unit_id_for_test"-->
-<!--        tools:ignore="MissingClass">-->
-<!--    </com.google.android.gms.ads.AdView>-->
+        <Button
+            android:id="@+id/btnLottoHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_round"
+            android:text="역대 로또 정보(선규)"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <!--    <com.google.android.gms.ads.AdView-->
+    <!--        xmlns:ads="http://schemas.android.com/apk/res-auto"-->
+    <!--        android:id="@+id/adView"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_centerHorizontal="true"-->
+    <!--        android:layout_alignParentBottom="true"-->
+    <!--        ads:adSize="BANNER"-->
+    <!--        ads:adUnitId="@string/banner_ad_unit_id_for_test"-->
+    <!--        tools:ignore="MissingClass">-->
+    <!--    </com.google.android.gms.ads.AdView>-->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:orientation="vertical"
         android:paddingLeft="45dp"
         android:paddingRight="20dp">
 
         <com.google.android.gms.ads.AdView
-            xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:id="@+id/adView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            ads:adSize="BANNER"
-            ads:adUnitId="/6499/example/banner"
-        />
+            android:layout_centerHorizontal="true"
+            ads2:adSize="BANNER"
+            ads2:adUnitId="/6499/example/banner" />
 
-<!--        <com.google.ads.AdView-->
-<!--            android:id="@+id/adView"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:layout_centerHorizontal="true"-->
-<!--            ads:adSize="BANNER"-->
-<!--            ads:adUnitId="/6499/example/banner" />-->
+        <!--        <com.google.ads.AdView-->
+        <!--            android:id="@+id/adView"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_alignParentBottom="true"-->
+        <!--            android:layout_centerHorizontal="true"-->
+        <!--            ads:adSize="BANNER"-->
+        <!--            ads:adUnitId="/6499/example/banner" />-->
 
     </LinearLayout>
 </LinearLayout>
