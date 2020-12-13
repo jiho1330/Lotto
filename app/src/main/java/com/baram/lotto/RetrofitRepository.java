@@ -2,27 +2,28 @@ package com.baram.lotto;
 
 import android.util.Log;
 
-import com.baram.lotto.Interface.AddrSearchService;
+import com.baram.lotto.Interface.RetrofitService;
 import com.baram.lotto.model.Location;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AddrSearchRepository {
+public class RetrofitRepository {
 
-    private static AddrSearchRepository INSTANCE;
+    private static RetrofitRepository INSTANCE;
 
-    public static AddrSearchRepository getINSTANCE() {
+    public static RetrofitRepository getINSTANCE() {
         if (INSTANCE == null) {
-            INSTANCE = new AddrSearchRepository();
+            INSTANCE = new RetrofitRepository();
         }
         return INSTANCE;
     }
 
+    // Kakao Map Api 주변 판매점 조회
     public void getAddressList(int page, double x, double y, int radius, AddressResponseListener listener) {
         Call<Location> call = RetrofitNet.getRetrofit().getSearchAddrService()
-                .searchAddressList("복권", page, x, y, radius, "KakaoAK " + AddrSearchService.KAKAO_AK);
+                .searchAddressList("복권", page, x, y, radius, "KakaoAK " + RetrofitService.KAKAO_AK);
         call.enqueue(new Callback<Location>() {
             @Override
             public void onResponse(Call<Location> call, Response<Location> response) {
@@ -43,6 +44,7 @@ public class AddrSearchRepository {
         });
     }
 
+    // Kakao Map Api 주변 판매점 조회 리스너
     public interface AddressResponseListener{
         void onSuccessResponse(Location locationData);
         void onFailResponse();

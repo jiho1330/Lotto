@@ -1,6 +1,6 @@
 package com.baram.lotto;
 
-import com.baram.lotto.Interface.AddrSearchService;
+import com.baram.lotto.Interface.RetrofitService;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -19,13 +19,14 @@ public class RetrofitNet {
     private RetrofitNet() {
     }
 
-    public AddrSearchService getSearchAddrService(){
+    // Kakao Map Api 서비스
+    public RetrofitService getSearchAddrService(){
         Retrofit kakaoRetrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(AddrSearchService.BASE_URL)
+                .baseUrl(RetrofitService.KAKAO_BASE_URL)
                 .build();
 
-        return kakaoRetrofit.create(AddrSearchService.class);
+        return kakaoRetrofit.create(RetrofitService.class);
     }
 
 }

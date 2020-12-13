@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+// Kakao Map Api - search Response
 public class Location {
     @SerializedName("documents")
     public List<Document> documentsList;

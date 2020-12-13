@@ -150,7 +150,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     }
 
     private void callPlaceList(int page, double x, double y) {
-        AddrSearchRepository.getINSTANCE().getAddressList(page, x, y, mRadius, new AddrSearchRepository.AddressResponseListener() {
+        RetrofitRepository.getINSTANCE().getAddressList(page, x, y, mRadius, new RetrofitRepository.AddressResponseListener() {
             @Override
             public void onSuccessResponse(Location locationData) {
 
