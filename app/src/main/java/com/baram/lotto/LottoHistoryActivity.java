@@ -1,5 +1,6 @@
 package com.baram.lotto;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +18,18 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import com.baram.lotto.Interface.RetrofitService;
+import com.baram.lotto.model.Location;
+import com.baram.lotto.model.LottoData;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.os.SystemClock.sleep;
 
 public class LottoHistoryActivity extends AppCompatActivity {
 
@@ -49,48 +62,41 @@ public class LottoHistoryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
 
-                new Thread(){
+                for(int i = 900; i <= 910; i++)
+                {
+                    callLottoRoundData(i);
+                }
+
+
+                /*
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(RetrofitService.LOTTO_BASE_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+                RetrofitService LottoService = retrofit.create(RetrofitService.class);
+
+                LottoService.getLotto("getLottoNumber","1").enqueue(new Callback() {
                     @Override
-                    public void run(){
-                        Document doc = null;
-                        try
+                    public void onResponse(@NonNull Call call, @NonNull Response response)
+                    {
+                        if(response.isSuccessful())
                         {
-                            String LottoBaseURL = "https://www.dhlottery.co.kr/gameResult.do?method=byWin&drwNo=";      //회차별 당첨번호 조회 URL
-                            int Round = 1;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
-                            String LottoRoundURL = LottoBaseURL + Integer.toString(Round);                              //URL 생성
-                            doc = Jsoup.connect(LottoRoundURL).get();
-
-                            Elements eRound = doc.select("#dwrNoList");                                        //
-                            String TotalRound = eRound.text();                                                          //드롭박스의 모든 Text를 가져옴(내림차순)
-                            String Rounds[] = TotalRound.split(" ");                                             // " "으로 Split
-                            int MaxRound = Integer.parseInt(Rounds[0]);                                                 //내림차순이기때문에 가장 처음 값이 최대값
-
-                            String WinNumbers = "";
-
-                            for(int i = 1; i <= 3/*MaxRound*/; i++)
+                            LottoData body = (LottoData) response.body();
+                            if(body != null)
                             {
-                                Round = i;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
-                                LottoRoundURL = LottoBaseURL + Integer.toString(Round);
-                                doc = Jsoup.connect(LottoRoundURL).get();
-
-                                eRound = doc.select(".nums");                                        //
-                                WinNumbers = eRound.text();
-                                WinNumbers = i + "회차 : " + WinNumbers;
-                                items.add(WinNumbers);
+                                items.add("추첨일 : " + body.getDrwNoDate());
                             }
-                            //adapter.notifyDataSetChanged();           // 리스트 목록 갱신
-
-                            Toast myToast = Toast.makeText(LottoHistoryActivity.this,WinNumbers, Toast.LENGTH_SHORT);
-                            myToast.show();
-                        }
-                        catch (IOException e)
-                        {
-                            Toast myToast = Toast.makeText(LottoHistoryActivity.this,"Error", Toast.LENGTH_SHORT);
-                            myToast.show();
-                            e.printStackTrace();
                         }
                     }
-                }.start();
+
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
+                        items.add("error");
+                    }
+                });
+
+                adapter.notifyDataSetChanged();
+                 */
 
                 /*
                 String text = "test";        // EditText에 입력된 문자열값을 얻기
@@ -108,54 +114,34 @@ public class LottoHistoryActivity extends AppCompatActivity {
         });
     }
 
-    private void getData()
-    {
-        LottoJsoup jsoupAsyncTask = new LottoJsoup();
-        jsoupAsyncTask.execute();
-    }
-
-    private class LottoJsoup extends AsyncTask<Void, Void, Void>
-    {
-        @Override
-        protected Void doInBackground(Void... voids)
-        {
-            try
-            {
-                Document doc = null;
-                String LottoBaseURL = "https://www.dhlottery.co.kr/gameResult.do?method=byWin&drwNo=";      //회차별 당첨번호 조회 URL
-                int Round = 1;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
-                String LottoRoundURL = LottoBaseURL + Integer.toString(Round);                              //URL 생성
-                doc = Jsoup.connect(LottoRoundURL).get();
-
-                //리스트 만들기
-                String WinNumbers;
-
-                Document RunDoc = null;
-                //현재 회차정보 가져오기
-                Elements eRound = doc.select("#dwrNoList");                                        //
-                String TotalRound = eRound.text();                                                          //드롭박스의 모든 Text를 가져옴(내림차순)
-                String Rounds[] = TotalRound.split(" ");                                             // " "으로 Split
-                int MaxRound = Integer.parseInt(Rounds[0]);                                                 //내림차순이기때문에 가장 처음 값이 최대값
-
-                for(int i = MaxRound; i >= MaxRound - 10/*MaxRound*/; --i) {
-                    Round = i;                                                                              //URL 뒤에 회차 숫자를 붙이는 걸로 페이지 이동
-                    LottoRoundURL = LottoBaseURL + Integer.toString(Round);
-                    doc = Jsoup.connect(LottoRoundURL).get();
-
-                    eRound = doc.select(".nums");                                        //
-                    WinNumbers = eRound.text();
-                    WinNumbers = i + "회차 : " + WinNumbers;
-                    items.add(WinNumbers);
+    private void callLottoRoundData(int Round) {
+        RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.AddressResponseListener() {
+            @Override
+            public void onSuccessResponse(LottoData lottoData) {
+                try {
+                    items.add(Round + "회 당첨번호 : " + lottoData.getDrwtNo1()
+                            + " " + lottoData.getDrwtNo2()
+                            + " " + lottoData.getDrwtNo3()
+                            + " " + lottoData.getDrwtNo4()
+                            + " " + lottoData.getDrwtNo5()
+                            + " " + lottoData.getDrwtNo6()
+                            + " 보너스 " + lottoData.getBnusNo()
+                    );
+                    adapter.notifyDataSetChanged();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                adapter.notifyDataSetChanged();           // 리스트 목록 갱신
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
             }
 
-            return null;
-        }
+            @Override
+            public void onFailResponse() {
+                //showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
+                //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onSuccessResponse(Location locationData) {
+
+            }
+        });
     }
 }

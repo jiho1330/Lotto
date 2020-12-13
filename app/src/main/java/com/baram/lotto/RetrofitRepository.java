@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.baram.lotto.Interface.RetrofitService;
 import com.baram.lotto.model.Location;
+import com.baram.lotto.model.LottoData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class RetrofitRepository {
 
@@ -48,6 +50,30 @@ public class RetrofitRepository {
     public interface AddressResponseListener{
         void onSuccessResponse(Location locationData);
         void onFailResponse();
+
+        void onSuccessResponse(LottoData lottoData);
     }
 
+    public void getLottoRoundData(String drwNum, AddressResponseListener listener){
+        Call<LottoData> call = RetrofitNet.getRetrofit().getLottoData().getLotto("getLottoNumber", drwNum);
+        call.enqueue(new Callback<LottoData>() {
+            @Override
+            public void onResponse(Call<LottoData> call, Response<LottoData> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        LottoData body = response.body();
+                        if (body != null) {
+                            Log.i("LottoRoundData","추첨일 " +body.getDrwNoDate());
+                            listener.onSuccessResponse(response.body());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LottoData> call, Throwable t) {
+                listener.onFailResponse();
+            }
+        });
+    }
 }

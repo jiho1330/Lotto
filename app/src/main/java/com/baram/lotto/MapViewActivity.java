@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baram.lotto.model.Location;
+import com.baram.lotto.model.LottoData;
 
 import net.daum.mf.map.api.CalloutBalloonAdapter;
 import net.daum.mf.map.api.CameraUpdateFactory;
@@ -183,6 +184,10 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             public void onFailResponse() {
                 showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
                 //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+            }
+
+            public void onSuccessResponse(LottoData lottoData) {
+
             }
         });
 

@@ -29,4 +29,13 @@ public class RetrofitNet {
         return kakaoRetrofit.create(RetrofitService.class);
     }
 
+    // Lotto Api
+    public  RetrofitService getLottoData(){
+        Retrofit LottoRetrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(RetrofitService.LOTTO_BASE_URL)
+                .build();
+
+        return LottoRetrofit.create(RetrofitService.class);
+    }
 }
