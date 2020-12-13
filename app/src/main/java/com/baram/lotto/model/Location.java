@@ -1,4 +1,4 @@
-package com.baram.lotto;
+package com.baram.lotto.model;
 
 import com.google.gson.annotations.SerializedName;
 

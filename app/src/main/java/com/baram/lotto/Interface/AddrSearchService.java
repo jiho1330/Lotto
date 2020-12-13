@@ -1,6 +1,6 @@
 package com.baram.lotto.Interface;
 
-import com.baram.lotto.Location;
+import com.baram.lotto.model.Location;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

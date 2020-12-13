@@ -3,6 +3,7 @@ package com.baram.lotto;
 import android.util.Log;
 
 import com.baram.lotto.Interface.AddrSearchService;
+import com.baram.lotto.model.Location;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,7 +29,7 @@ public class AddrSearchRepository {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
                         for (int i = 0; i < response.body().documentsList.size(); i++) {
-                            Log.i("MJ_DEBUG", "[GET] getAddressList : " + response.body().documentsList.get(i).getAddress_name());
+                            Log.i("AddrSearchRepository", "[GET] getAddressList : " + response.body().documentsList.get(i).getAddress_name());
                         }
                         listener.onSuccessResponse(response.body());
                     }

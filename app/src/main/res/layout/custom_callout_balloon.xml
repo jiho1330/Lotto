@@ -48,8 +48,9 @@
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="12sp"
-                android:text="도로명" />
+                android:text="도로명"
+                android:textColor="#ff7f7f7f"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/road_address_name"
@@ -71,8 +72,9 @@
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="12sp"
-                android:text="지번" />
+                android:text="지번"
+                android:textColor="#ff7f7f7f"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/address_name"
@@ -95,8 +97,9 @@
                 android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="12sp"
-                android:text="전화" />
+                android:text="전화"
+                android:textColor="#ff7f7f7f"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/phone_number"
@@ -105,21 +108,22 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="phone number"
-                android:textColor="#ff3030ff"
+                android:textColor="#ff454545"
                 android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnGeo"
-                style="@style/Widget.AppCompat.Button.Small"
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_margin="3dp"
+                android:background="@drawable/button_round"
                 android:paddingStart="2dp"
                 android:paddingLeft="0dp"
                 android:paddingTop="0dp"
