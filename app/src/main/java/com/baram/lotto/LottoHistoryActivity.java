@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -38,6 +40,8 @@ public class LottoHistoryActivity extends AppCompatActivity {
     ArrayList<String> items;
     ArrayAdapter<String> adapter;
     ListView listView;
+
+    Context context = getApplicationContext();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
