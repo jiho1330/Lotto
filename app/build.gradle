@@ -58,4 +58,7 @@ dependencies {
     // Kakao Map Library
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/libDaumMapAndroid.jar')
+
+    // QR Code Scan
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
 }

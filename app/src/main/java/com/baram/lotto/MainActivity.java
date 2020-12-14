@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -13,6 +14,7 @@ import com.google.android.gms.ads.InterstitialAd;
 
 public class MainActivity extends AppCompatActivity {
     Button btnLotto, btnMapView, btnLottoHistory;
+    ImageButton btnQRCode;
     private AdView mAdView;
     private InterstitialAd mInterstitialAd;
     @Override
@@ -47,7 +49,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
-                // 주변 지도보기 화면으로 전환
+                // 역대 로또 정보 화면으로 전환
+                startActivity(mIntent);
+            }
+        });
+
+        btnQRCode = findViewById(R.id.btnQRCode);
+        btnQRCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mIntent = new Intent(getApplicationContext(), QRScanActivity.class);
+                // QR Code Scan 화면으로 전환
                 startActivity(mIntent);
             }
         });
