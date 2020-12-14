@@ -22,8 +22,14 @@ public class RetrofitRepository {
         return INSTANCE;
     }
 
+    // 응답 리스너 (T: 데이터 타입)
+    public interface ResponseListener<T> {
+        void onSuccessResponse(T data);
+        void onFailResponse();
+    }
+
     // Kakao Map Api 주변 판매점 조회
-    public void getAddressList(int page, double x, double y, int radius, AddressResponseListener listener) {
+    public void getAddressList(int page, double x, double y, int radius, ResponseListener<Location> listener) {
         Call<Location> call = RetrofitNet.getRetrofit().getSearchAddrService()
                 .searchAddressList("복권", page, x, y, radius, "KakaoAK " + RetrofitService.KAKAO_AK);
         call.enqueue(new Callback<Location>() {
@@ -46,15 +52,8 @@ public class RetrofitRepository {
         });
     }
 
-    // Kakao Map Api 주변 판매점 조회 리스너
-    public interface AddressResponseListener{
-        void onSuccessResponse(Location locationData);
-        void onFailResponse();
-
-        void onSuccessResponse(LottoData lottoData);
-    }
-
-    public void getLottoRoundData(String drwNum, AddressResponseListener listener){
+    // Lotto Api 조회
+    public void getLottoRoundData(String drwNum, ResponseListener<LottoData> listener) {
         Call<LottoData> call = RetrofitNet.getRetrofit().getLottoData().getLotto("getLottoNumber", drwNum);
         call.enqueue(new Callback<LottoData>() {
             @Override
@@ -76,4 +75,5 @@ public class RetrofitRepository {
             }
         });
     }
+
 }

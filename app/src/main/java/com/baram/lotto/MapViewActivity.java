@@ -151,7 +151,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     }
 
     private void callPlaceList(int page, double x, double y) {
-        RetrofitRepository.getINSTANCE().getAddressList(page, x, y, mRadius, new RetrofitRepository.AddressResponseListener() {
+        RetrofitRepository.getINSTANCE().getAddressList(page, x, y, mRadius, new RetrofitRepository.ResponseListener<Location>() {
             @Override
             public void onSuccessResponse(Location locationData) {
 
@@ -184,10 +184,6 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             public void onFailResponse() {
                 showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
                 //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
-            }
-
-            public void onSuccessResponse(LottoData lottoData) {
-
             }
         });
 
