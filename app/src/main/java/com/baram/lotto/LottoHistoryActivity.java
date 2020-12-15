@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import com.baram.lotto.Interface.RetrofitService;
 import com.baram.lotto.model.Location;
 import com.baram.lotto.model.LottoData;
+import com.baram.lotto.PreferenceLottoData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,12 +37,12 @@ import static android.os.SystemClock.sleep;
 public class LottoHistoryActivity extends AppCompatActivity {
 
     Button btnLottoHistoryView;
+    Button btnLottoHistoryUpdate;
+    Button btnLottoHistoryDelete;
 
     ArrayList<String> items;
     ArrayAdapter<String> adapter;
     ListView listView;
-
-    Context context = getApplicationContext();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,43 +66,24 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
+                int nLastRound = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoLastRound();
 
-                for(int i = 900; i <= 910; i++)
+                String text;
+                LottoData lottoData;
+                for(int i = 0; i < 10; i++)
                 {
-                    callLottoRoundData(i);
+                    lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(nLastRound - i);
+                    text = (nLastRound - i) + "회 : " +
+                            "[" + lottoData.getDrwtNo1() + "] " +
+                            "[" + lottoData.getDrwtNo2() + "] " +
+                            "[" + lottoData.getDrwtNo3() + "] " +
+                            "[" + lottoData.getDrwtNo4() + "] " +
+                            "[" + lottoData.getDrwtNo5() + "] " +
+                            "[" + lottoData.getDrwtNo6() + "] " +
+                            "보너스 [" + lottoData.getBnusNo() + "]";
+                    items.add(text);
                 }
-
-
-                /*
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(RetrofitService.LOTTO_BASE_URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-                RetrofitService LottoService = retrofit.create(RetrofitService.class);
-
-                LottoService.getLotto("getLottoNumber","1").enqueue(new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response)
-                    {
-                        if(response.isSuccessful())
-                        {
-                            LottoData body = (LottoData) response.body();
-                            if(body != null)
-                            {
-                                items.add("추첨일 : " + body.getDrwNoDate());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull Throwable t) {
-                        items.add("error");
-                    }
-                });
-
                 adapter.notifyDataSetChanged();
-                 */
-
                 /*
                 String text = "test";        // EditText에 입력된 문자열값을 얻기
                 items.add(text);                          // items 리스트에 입력된 문자열 추가
@@ -114,6 +96,22 @@ public class LottoHistoryActivity extends AppCompatActivity {
                 items.add("Saturday");
                 adapter.notifyDataSetChanged();           // 리스트 목록 갱신
                 */
+            }
+        });
+
+        btnLottoHistoryUpdate = findViewById(R.id.btnLottoHistoryUpdate);
+        btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
+                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundData();
+            }
+        });
+
+        btnLottoHistoryDelete = findViewById(R.id.btnLottoHistoryDelete);
+        btnLottoHistoryDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {   //여기서 클릭 시 행동을 결정
+                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
             }
         });
     }
