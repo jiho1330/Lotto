@@ -145,8 +145,9 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
 
     // 토스트 메시지 표시
     private void showToastMessage(String message, int duration) {
-        mToast.setDuration(duration);
-        mToast.setText(message);
+        if (mToast != null)
+            mToast.cancel();
+        mToast = Toast.makeText(getApplicationContext(), message, duration);
         mToast.show();
     }
 
