@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     private List<Location.Document> mDocList = new ArrayList<>();
     private int mRadius = 0;    // 반경
     MapPoint mLocation; // 현재 위치
+    private boolean canExecute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +76,15 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (mLocation != null) {
-                    MapPoint.GeoCoordinate mapPointGeo = mLocation.getMapPointGeoCoord();
-                    CircleMaker(mapPointGeo.longitude, mapPointGeo.latitude);
-                    callPlaceList(1, mapPointGeo.longitude, mapPointGeo.latitude);
+                    if (canExecute) {
+                        MapPoint.GeoCoordinate mapPointGeo = mLocation.getMapPointGeoCoord();
+                        CircleMaker(mapPointGeo.longitude, mapPointGeo.latitude);
+                        callPlaceList(1, mapPointGeo.longitude, mapPointGeo.latitude);
+                        canExecute = false; // Map API 잠금
+                    } else {
+                        showToastMessage("잠시 후 다시 시도하십시오.", Toast.LENGTH_SHORT);
+                    }
+
                 } else {
                     showToastMessage("현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT);
                 }
@@ -92,6 +100,8 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
         mapView.setCurrentLocationEventListener(this);  // 현재위치 이벤트 리스너 설정
         mapView.setPOIItemEventListener(this);  // Marker 이벤트 설정
         mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter());    // 콜아웃 벌룬 어뎁터 설정
+
+        canExecute = true;
 
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
@@ -173,9 +183,19 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
                     // 마지막 페이지가 아니면
                     if (!locationData.meta.isIs_end()) {
                         callPlaceList(page + 1, x, y);
+                    } else {    // 마지막 페이지면
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                canExecute = true; // Map API 잠금해제
+                            }
+                        }, 3000);
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    canExecute = true; // Map API 잠금해제
                 }
 
             }
@@ -183,6 +203,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             @Override
             public void onFailResponse() {
                 showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
+                canExecute = true; // Map API 잠금해제
                 //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
             }
         });
@@ -256,6 +277,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             if (mapView.getCircles().length == 0) {
                 CircleMaker(mapPointGeo.longitude, mapPointGeo.latitude);
                 callPlaceList(1, mapPointGeo.longitude, mapPointGeo.latitude);
+                canExecute = false; // Map API 잠금
             }
 
         } catch (Exception e) {
