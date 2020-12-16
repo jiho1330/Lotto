@@ -1,6 +1,8 @@
 package com.baram.lotto;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.baram.lotto.model.LottoData;
@@ -26,6 +28,57 @@ public class PreferenceLottoData {
     public static final String LOTTO_DATA_DRWTNO_6      = "_DRWTNO_6";
     public static final String LOTTO_DATA_BNUSNO        = "_BnusNo";
 
+    class Progress_Task extends AsyncTask<Integer, Integer, Void> {
+        private ProgressDialog progressDialog = null;       // 원형 ProgressBar 생성
+        public Progress_Task() { super(); }
+
+        @Override
+        // doInBackground 전에 실행(UI Thread) - 백그라운드 작업 전 초기화 부분
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // ProgressDialog 생성, 레이아웃 변경
+            progressDialog = new ProgressDialog(mContext, android.R.style.Theme_Material_Dialog_Alert);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);      // Style - 원 모양 설정
+            progressDialog.setMessage("Now Update...");                           // Message - 표시할 텍스트
+            progressDialog.setCanceledOnTouchOutside(false);                    // 터치시 Canceled 막기
+            progressDialog.show();                                              // UI 표시
+        }
+
+        @Override
+        // 백그라운드 작업 시작, UI 조작 불가, onPreExcute() 종료후 바로 호출
+        protected Void doInBackground(Integer... ints) {
+            for (int i = 0; i < 4; i++) {
+                try {
+                    // UI Update, publishProgress() - onProgressUpdate 호출
+                    //publishProgress(ints[0]);
+                    progressDialog.setMessage("Now Update...Round " + ints[0]);
+                    Thread.sleep(500);                  // 0.5초 간격 UI Update
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        // UI 조작가능 (UI Thread에서 실행)
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            //progressBar.incrementProgressBy(values[0]);
+            //progress_value.setText(progressBar.getProgress()+"%");
+        }
+
+        @Override
+        // UI Thread에서 실행, doInBackground 종료 후 바로 호출
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            progressDialog.dismiss();       // ProgressDialog 지우기
+            //progressBar.setProgress(20);
+            //progress_value.setText(progressBar.getProgress()+"%");
+        }
+    }
+
+    Progress_Task progress_task;
 
     public static PreferenceLottoData getPreferenceLottoData(Context context){
         if(INSTANCE == null){
@@ -37,6 +90,15 @@ public class PreferenceLottoData {
     private PreferenceLottoData(Context context){
         mContext = context;
         LastRound = PreferenceManager.getString(mContext, LOTTO_DATA_LAST_ROUND);
+        progress_task = new Progress_Task();
+    }
+
+
+
+    public void updateLottoRoundDataProgress()
+    {
+        progress_task.onPreExecute();
+        updateLottoRoundData();
     }
 
     public void updateLottoRoundData()
@@ -54,6 +116,7 @@ public class PreferenceLottoData {
             Round = nLastRound + 1;
 
         String Key = LOTTO_DATA_KEY + Round;
+        progress_task.doInBackground(Round);
 
         RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.ResponseListener<LottoData>() {
             @Override
@@ -76,8 +139,12 @@ public class PreferenceLottoData {
                     Log.i("updateLottoRoundData", "Success Round : " + Round);
                     updateLottoRoundData();
                 }
-                else
-                    Log.i("updateLottoRoundData", "Fail Round : " + Round);
+                else {
+                    Log.i("updateLottoRoundData", "Finish Round : " + Round);
+                    Void result = null;
+                    progress_task.onPostExecute(result);
+
+                }
             }
 
             @Override
@@ -119,6 +186,9 @@ public class PreferenceLottoData {
 
     public int getLottoLastRound()
     {
-        return Integer.parseInt(LastRound);
+        if(LastRound.equals(""))
+            return -1;
+        else
+            return Integer.parseInt(LastRound);
     }
 }
