@@ -70,20 +70,34 @@ public class LottoHistoryActivity extends AppCompatActivity {
 
                 String text;
                 LottoData lottoData;
-                for(int i = 0; i < 10; i++)
+                int FindRound;
+                if(nLastRound != -1)
                 {
-                    lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(nLastRound - i);
-                    text = (nLastRound - i) + "회 : " +
-                            "[" + lottoData.getDrwtNo1() + "] " +
-                            "[" + lottoData.getDrwtNo2() + "] " +
-                            "[" + lottoData.getDrwtNo3() + "] " +
-                            "[" + lottoData.getDrwtNo4() + "] " +
-                            "[" + lottoData.getDrwtNo5() + "] " +
-                            "[" + lottoData.getDrwtNo6() + "] " +
-                            "보너스 [" + lottoData.getBnusNo() + "]";
-                    items.add(text);
+                    for(int i = 0; i < 10; i++)
+                    {
+                        FindRound = nLastRound - i;
+                        if(FindRound <= 0)
+                        {
+                            break;
+                        }
+                        lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(FindRound);
+                        text = (nLastRound - i) + "회 : " +
+                                "[" + lottoData.getDrwtNo1() + "] " +
+                                "[" + lottoData.getDrwtNo2() + "] " +
+                                "[" + lottoData.getDrwtNo3() + "] " +
+                                "[" + lottoData.getDrwtNo4() + "] " +
+                                "[" + lottoData.getDrwtNo5() + "] " +
+                                "[" + lottoData.getDrwtNo6() + "] " +
+                                "보너스 [" + lottoData.getBnusNo() + "]";
+                        items.add(text);
+                    }
+                    adapter.notifyDataSetChanged();
                 }
-                adapter.notifyDataSetChanged();
+                else
+                {
+                    //Toast 메세지 알람
+                    Toast.makeText(getApplicationContext(), "Data Update가 필요합니다.", Toast.LENGTH_SHORT).show();
+                }
                 /*
                 String text = "test";        // EditText에 입력된 문자열값을 얻기
                 items.add(text);                          // items 리스트에 입력된 문자열 추가
@@ -103,7 +117,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
-                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundData();
+                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress();
             }
         });
 
