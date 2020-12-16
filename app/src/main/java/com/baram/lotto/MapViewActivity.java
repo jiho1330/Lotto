@@ -9,7 +9,9 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -137,7 +139,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
         mapView.addCircle(mCircle);
 
         // Circle 전체가 맵에 나오게 설정
-        MapPointBounds[] mapPointBoundsArray = { mCircle.getBound()};
+        MapPointBounds[] mapPointBoundsArray = { mCircle.getBound() };
         MapPointBounds mapPointBounds = new MapPointBounds(mapPointBoundsArray);
         int padding = 30; // px 여백
         mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding));
@@ -149,6 +151,35 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
             mToast.cancel();
         mToast = Toast.makeText(getApplicationContext(), message, duration);
         mToast.show();
+    }
+
+    /**
+     * 화면회전 이벤트
+     * @param newConfig
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (mapView.getCircles().length == 0) {
+            return;
+        }
+
+        int padding = 0;
+        switch (newConfig.orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                padding = 100; // px 여백
+                // Circle 전체가 맵에 나오게 설정
+                MapPointBounds[] mapPointBoundsArray = { mapView.getCircles()[0].getBound() };
+                MapPointBounds mapPointBounds = new MapPointBounds(mapPointBoundsArray);
+                mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding));
+                break;
+            case Configuration.ORIENTATION_PORTRAIT:
+                //padding = 30; // px 여백
+                break;
+        }
+
+
     }
 
     @Override

@@ -16,15 +16,18 @@
         android:theme="@style/Theme.Lotto"
         android:usesCleartextTraffic="true">
         <activity android:name=".WebViewActivity"></activity>
-        <activity android:name=".SplashActivity">
+        <activity android:name=".SplashActivity"
+                  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".MapViewActivity">
+        <activity android:name=".MainActivity"
+                  android:screenOrientation="portrait" />
+        <activity android:name=".MapViewActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
