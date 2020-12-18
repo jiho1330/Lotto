@@ -4,14 +4,19 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.baram.lotto.model.LottoData;
+import com.google.gson.Gson;
+
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PreferenceLottoData {
     private Context mContext;
     private static PreferenceLottoData INSTANCE;
 
     private String LastRound = "-1";
+    private int Progress;
 
     //Key 포맷 LottoData_Round숫자_항목
     public static final String LOTTO_DATA_KEY           = "LottoData_Round";
@@ -38,7 +43,9 @@ public class PreferenceLottoData {
             super.onPreExecute();
             // ProgressDialog 생성, 레이아웃 변경
             progressDialog = new ProgressDialog(mContext, android.R.style.Theme_Material_Dialog_Alert);
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);      // Style - 원 모양 설정
+            //progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);      // Style - 원 모양 설정
+            progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Horizontal);
+            progressDialog.setMax(942);
             progressDialog.setMessage("Now Update...");                           // Message - 표시할 텍스트
             progressDialog.setCanceledOnTouchOutside(false);                    // 터치시 Canceled 막기
             progressDialog.show();                                              // UI 표시
@@ -51,8 +58,9 @@ public class PreferenceLottoData {
                 try {
                     // UI Update, publishProgress() - onProgressUpdate 호출
                     //publishProgress(ints[0]);
-                    progressDialog.setMessage("Now Update...Round " + ints[0]);
-                    Thread.sleep(500);                  // 0.5초 간격 UI Update
+                    progressDialog.setMessage(String.format("Now Update...[%d/%d]", ints[0], ints[1]));
+                    Thread.sleep(100);                  // 0.1초 간격 UI Update
+                    //Thread.sleep(500);                  // 0.5초 간격 UI Update
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -73,6 +81,7 @@ public class PreferenceLottoData {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             progressDialog.dismiss();       // ProgressDialog 지우기
+
             //progressBar.setProgress(20);
             //progress_value.setText(progressBar.getProgress()+"%");
         }
@@ -93,15 +102,13 @@ public class PreferenceLottoData {
         progress_task = new Progress_Task();
     }
 
-
-
-    public void updateLottoRoundDataProgress()
+    public void updateLottoRoundDataProgress(int currentRound)
     {
         progress_task.onPreExecute();
-        updateLottoRoundData();
+        updateLottoRoundData(currentRound);
     }
 
-    public void updateLottoRoundData()
+    public void updateLottoRoundData(int currentRound)
     {
         int nLastRound;
         int Round;
@@ -116,43 +123,98 @@ public class PreferenceLottoData {
             Round = nLastRound + 1;
 
         String Key = LOTTO_DATA_KEY + Round;
-        progress_task.doInBackground(Round);
+        //progress_task.doInBackground(Round);
 
-        RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.ResponseListener<LottoData>() {
-            @Override
-            public void onSuccessResponse(LottoData lottoData) {
-                if(!lottoData.getReturnValue().equals("fail"))
-                {
-                    LastRound = Integer.toString(Round);
-                    PreferenceManager.setString(mContext, LOTTO_DATA_LAST_ROUND,                 LastRound);     //로또 당첨 일시
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DATE,            lottoData.getDrwNoDate());     //로또 당첨 일시
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_TOTALSELLAMNT,   lottoData.getTotSellamnt());     //누적 상금
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTWINAMNT,    lottoData.getFirstWinamnt());     //1등 당첨금
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTPRZWNERCO,  lottoData.getFirstPrzwnerCo());     //1등 당첨 인원
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_1,        lottoData.getDrwtNo1());     //로또 번호 1
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_2,        lottoData.getDrwtNo2());     //로또 번호 2
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_3,        lottoData.getDrwtNo3());     //로또 번호 3
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_4,        lottoData.getDrwtNo4());     //로또 번호 4
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_5,        lottoData.getDrwtNo5());     //로또 번호 5
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_6,        lottoData.getDrwtNo6());     //로또 번호 6
-                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_BNUSNO,          lottoData.getBnusNo());     //보너스 번호
-                    Log.i("updateLottoRoundData", "Success Round : " + Round);
-                    updateLottoRoundData();
-                }
-                else {
-                    Log.i("updateLottoRoundData", "Finish Round : " + Round);
-                    Void result = null;
-                    progress_task.onPostExecute(result);
+        // 현재회차가 있으면
+        if (currentRound != -1) {
+            LastRound = String.valueOf(currentRound);
+            PreferenceManager.setString(mContext, LOTTO_DATA_LAST_ROUND, LastRound);     // 마지막 회차
+            Progress = 0;
 
-                }
+            // 최근 리스트를 가져옴
+            for (int i = currentRound; i > currentRound - 400; i--) {
+                RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(i), new RetrofitRepository.ResponseListener<LottoData>() {
+                    @Override
+                    public void onSuccessResponse(LottoData lottoData) {
+                        if (lottoData.getReturnValue().equals("success")) {
+                            String key = LOTTO_DATA_KEY + lottoData.getDrwNo();
+
+                            //progress_task.doInBackground(Progress, currentRound);
+
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DATE,            lottoData.getDrwNoDate());     //로또 당첨 일시
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_TOTALSELLAMNT,   lottoData.getTotSellamnt());     //누적 상금
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_FIRSTWINAMNT,    lottoData.getFirstWinamnt());     //1등 당첨금
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_FIRSTPRZWNERCO,  lottoData.getFirstPrzwnerCo());     //1등 당첨 인원
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_1,        lottoData.getDrwtNo1());     //로또 번호 1
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_2,        lottoData.getDrwtNo2());     //로또 번호 2
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_3,        lottoData.getDrwtNo3());     //로또 번호 3
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_4,        lottoData.getDrwtNo4());     //로또 번호 4
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_5,        lottoData.getDrwtNo5());     //로또 번호 5
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_DRWTNO_6,        lottoData.getDrwtNo6());     //로또 번호 6
+                            PreferenceManager.setString(mContext, key + LOTTO_DATA_BNUSNO,          lottoData.getBnusNo());     //보너스 번호
+                        }
+
+                        Log.i("Progress", "Now: " + Progress++ + " > " + lottoData.getReturnValue());
+                        // 1회차이면 로딩 종료
+                        if (Progress == 400)
+                        {
+                            Log.i("updateLottoRoundData", "Finish Round : " + lottoData.getDrwNo());
+                            Void result = null;
+                            progress_task.onPostExecute(result);
+                            Toast.makeText(mContext, "최근 데이터 " + Progress + "건을 불러왔습니다.", Toast.LENGTH_SHORT).show();
+                        }
+
+                        lottoData = null;
+                    }
+
+                    @Override
+                    public void onFailResponse() {
+                        //showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
+                        //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
-            @Override
-            public void onFailResponse() {
-                //showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
-                //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
-            }
-        });
+        } else {
+
+            RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.ResponseListener<LottoData>() {
+                @Override
+                public void onSuccessResponse(LottoData lottoData) {
+                    if(!lottoData.getReturnValue().equals("fail"))
+                    {
+                        LastRound = Integer.toString(Round);
+
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_LAST_ROUND,                 LastRound);     //로또 당첨 일시
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DATE,            lottoData.getDrwNoDate());     //로또 당첨 일시
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_TOTALSELLAMNT,   lottoData.getTotSellamnt());     //누적 상금
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTWINAMNT,    lottoData.getFirstWinamnt());     //1등 당첨금
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTPRZWNERCO,  lottoData.getFirstPrzwnerCo());     //1등 당첨 인원
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_1,        lottoData.getDrwtNo1());     //로또 번호 1
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_2,        lottoData.getDrwtNo2());     //로또 번호 2
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_3,        lottoData.getDrwtNo3());     //로또 번호 3
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_4,        lottoData.getDrwtNo4());     //로또 번호 4
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_5,        lottoData.getDrwtNo5());     //로또 번호 5
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_6,        lottoData.getDrwtNo6());     //로또 번호 6
+                        PreferenceManager.setString(mContext, Key + LOTTO_DATA_BNUSNO,          lottoData.getBnusNo());     //보너스 번호
+                        Log.i("updateLottoRoundData", "Success Round : " + Round);
+                        updateLottoRoundData(-1);
+                    }
+                    else {
+                        Log.i("updateLottoRoundData", "Finish Round : " + Round);
+                        Void result = null;
+                        progress_task.onPostExecute(result);
+
+                    }
+                }
+
+                @Override
+                public void onFailResponse() {
+                    //showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
+                    //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
     }
 
     public void deleteLottoRoundData()
@@ -169,6 +231,7 @@ public class PreferenceLottoData {
         String Key = LOTTO_DATA_KEY + Round;
         LottoData lottoData = new LottoData();
 
+        lottoData.setDrwNo(String.valueOf(Round));
         lottoData.setDrwNoDate(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DATE));
         lottoData.setTotSellamnt(PreferenceManager.getString(mContext, Key + LOTTO_DATA_TOTALSELLAMNT));
         lottoData.setFirstWinamnt(PreferenceManager.getString(mContext, Key + LOTTO_DATA_FIRSTWINAMNT));
