@@ -11,7 +11,7 @@ public class LottoData {
     String drwtNo5;
     String bnusNo;
     String firstAccumamnt;
-    String drwtNo;
+    String drwNo;
     String drwtNo2;
     String drwtNo3;
     String drwtNo1;
@@ -22,6 +22,7 @@ public class LottoData {
     public String getFirstWinamnt() { return firstWinamnt; }
     public String getFirstPrzwnerCo() { return firstPrzwnerCo; }
     public String getFirstAccumamnt() { return firstAccumamnt; }
+    public String getDrwNo() { return drwNo; }
     public String getDrwtNo1() { return drwtNo1; }
     public String getDrwtNo2() { return drwtNo2; }
     public String getDrwtNo3() { return drwtNo3; }
