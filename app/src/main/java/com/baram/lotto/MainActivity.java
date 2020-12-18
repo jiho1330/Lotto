@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
+
+                mIntent.putExtra("currentRound", getCurrentRound());
                 // 역대 로또 정보 화면으로 전환
                 startActivity(mIntent);
             }
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
 
-        // 현재 주차의 당첨결과
+        // 현재 회차의 당첨결과
         tvTime = findViewById(R.id.tvTime);
         tvDate = findViewById(R.id.tvDate);
         balls[0] = findViewById(R.id.ball_1);
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         balls[5] = findViewById(R.id.ball_6);
         balls[6] = findViewById(R.id.ball_bonus);
 
-        getLastLottoNumber(getWeekDiff());
+        getLastLottoNumber(getCurrentRound());
     }
 
     private void getLastLottoNumber(int drwNo) {
@@ -157,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 현재 회차를 구함
-    private int getWeekDiff() {
+    private int getCurrentRound() {
         // 복권 1주차 2002.12.07
         Calendar c1 = new GregorianCalendar(2002, 12 - 1, 7);
         // 현재일자
