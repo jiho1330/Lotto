@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
     ArrayList<String> items;
     ArrayAdapter<String> adapter;
     ListView listView;
+    int currentRound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,9 @@ public class LottoHistoryActivity extends AppCompatActivity {
         //listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE); // 하나의 항목만 선택할 수 있도록 설정
 
         //getData();
+        // 이전 Activity에서 넘겨 받은 값을 가져옴
+        Intent mIntent = getIntent();
+        currentRound = mIntent.getIntExtra("currentRound", -1);
 
         btnLottoHistoryView = findViewById(R.id.btnLottoHistoryView);
         btnLottoHistoryView.setOnClickListener(new View.OnClickListener() {
@@ -73,22 +78,33 @@ public class LottoHistoryActivity extends AppCompatActivity {
                 int FindRound;
                 if(nLastRound != -1)
                 {
-                    for(int i = 0; i < 10; i++)
+                    nLastRound -= items.size(); // 현재 회차 - 리스트 크기
+                    // 20회차 정보를 더 불러옴
+                    for (int i = 0; i < 20; i++)
                     {
                         FindRound = nLastRound - i;
+                        // 회차가 0이하이면 종료
                         if(FindRound <= 0)
                         {
                             break;
                         }
+
                         lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(FindRound);
-                        text = (nLastRound - i) + "회 : " +
-                                "[" + lottoData.getDrwtNo1() + "] " +
-                                "[" + lottoData.getDrwtNo2() + "] " +
-                                "[" + lottoData.getDrwtNo3() + "] " +
-                                "[" + lottoData.getDrwtNo4() + "] " +
-                                "[" + lottoData.getDrwtNo5() + "] " +
-                                "[" + lottoData.getDrwtNo6() + "] " +
-                                "보너스 [" + lottoData.getBnusNo() + "]";
+                        // 회차의 일자 정보가 없으면 스킵
+                        if (lottoData.getDrwNoDate().equals("")) {
+                            continue;
+                        }
+
+                        text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
+                                lottoData.getDrwNo(),
+                                lottoData.getDrwtNo1(),
+                                lottoData.getDrwtNo2(),
+                                lottoData.getDrwtNo3(),
+                                lottoData.getDrwtNo4(),
+                                lottoData.getDrwtNo5(),
+                                lottoData.getDrwtNo6(),
+                                lottoData.getBnusNo());
+
                         items.add(text);
                     }
                     adapter.notifyDataSetChanged();
@@ -117,7 +133,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
-                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress();
+                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress(currentRound);
             }
         });
 
@@ -126,6 +142,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {   //여기서 클릭 시 행동을 결정
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
+                Toast.makeText(getApplicationContext(), "저장된 정보가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
             }
         });
     }
