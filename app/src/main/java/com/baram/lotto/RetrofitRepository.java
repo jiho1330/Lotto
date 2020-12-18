@@ -62,12 +62,11 @@ public class RetrofitRepository {
                     if (response.body() != null) {
                         LottoData body = response.body();
                         if (body != null) {
-                            Log.i("LottoRoundData","Result " +body.getReturnValue());
-                            Log.i("LottoRoundData","추첨일 " +body.getDrwNoDate());
                             listener.onSuccessResponse(response.body());
                         }
                     }
                 }
+                response = null;
             }
 
             @Override

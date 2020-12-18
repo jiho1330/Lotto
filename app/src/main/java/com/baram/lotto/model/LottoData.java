@@ -37,6 +37,7 @@ public class LottoData {
     public void setFirstWinamnt(String Data) { firstWinamnt = Data; }
     public void setFirstPrzwnerCo(String Data) { firstPrzwnerCo = Data; }
     public void setFirstAccumamnt(String Data) {  firstAccumamnt = Data; }
+    public void setDrwNo(String Data) { drwNo = Data; }
     public void setDrwtNo1(String Data) { drwtNo1 = Data; }
     public void setDrwtNo2(String Data) { drwtNo2 = Data; }
     public void setDrwtNo3(String Data) { drwtNo3 = Data; }
