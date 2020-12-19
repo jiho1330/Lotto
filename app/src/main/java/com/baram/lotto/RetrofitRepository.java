@@ -9,7 +9,6 @@ import com.baram.lotto.model.LottoData;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class RetrofitRepository {
 
@@ -62,11 +61,10 @@ public class RetrofitRepository {
                     if (response.body() != null) {
                         LottoData body = response.body();
                         if (body != null) {
-                            listener.onSuccessResponse(response.body());
+                            listener.onSuccessResponse(body);
                         }
                     }
                 }
-                response = null;
             }
 
             @Override

@@ -1,13 +1,8 @@
 package com.baram.lotto;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,25 +10,9 @@ import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
-import com.baram.lotto.Interface.RetrofitService;
-import com.baram.lotto.model.Location;
 import com.baram.lotto.model.LottoData;
-import com.baram.lotto.PreferenceLottoData;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-import static android.os.SystemClock.sleep;
 
 public class LottoHistoryActivity extends AppCompatActivity {
 
@@ -91,7 +70,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
 
                         lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(FindRound);
                         // 회차의 일자 정보가 없으면 스킵
-                        if (lottoData.getDrwNoDate().equals("")) {
+                        if (lottoData == null) {
                             continue;
                         }
 
@@ -133,6 +112,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
+                Toast.makeText(getApplicationContext(), "로또 정보 불러오는 중...", Toast.LENGTH_LONG).show();
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress(currentRound);
             }
         });
@@ -142,6 +122,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {   //여기서 클릭 시 행동을 결정
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
+                items.clear();  // 리스트를 비움
                 Toast.makeText(getApplicationContext(), "저장된 정보가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
             }
         });
