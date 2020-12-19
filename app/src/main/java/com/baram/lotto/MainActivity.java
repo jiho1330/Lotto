@@ -166,7 +166,9 @@ public class MainActivity extends AppCompatActivity {
         Calendar c2 = Calendar.getInstance();
 
         // 두 날짜를 milliseconds로 변환 후 차이를 구함
-        long milliDiff = c2.getTimeInMillis() - c1.getTimeInMillis();
+        long ms1 = c1.getTimeInMillis() + (1000 * 60 * 60 * 21); // 자정 + 21시간 = 토요일 오후 9시
+        long ms2 = c2.getTimeInMillis();
+        long milliDiff = ms2 - ms1;
 
         // 차이 milliseconds를 1주일로 나눔
         int weekDiff = (int)(milliDiff / (1000 * 60 * 60 * 24 * 7));
