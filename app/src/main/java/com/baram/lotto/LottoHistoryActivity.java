@@ -87,6 +87,12 @@ public class LottoHistoryActivity extends AppCompatActivity {
                         items.add(text);
                     }
                     adapter.notifyDataSetChanged();
+
+                    if (items.size() > 20) {
+                        // 스크롤 이동
+                        listView.smoothScrollToPosition(items.size() - 10);
+                    }
+
                 }
                 else
                 {
@@ -112,7 +118,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
-                Toast.makeText(getApplicationContext(), "로또 정보 불러오는 중...", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "로또 정보 불러오는 중...", Toast.LENGTH_SHORT).show();
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress(currentRound);
             }
         });
@@ -123,6 +129,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
             public void onClick(View v) {   //여기서 클릭 시 행동을 결정
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
                 items.clear();  // 리스트를 비움
+                adapter.notifyDataSetChanged();
                 Toast.makeText(getApplicationContext(), "저장된 정보가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
             }
         });
