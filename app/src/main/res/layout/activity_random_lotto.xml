@@ -13,7 +13,7 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="오늘의 로또번호"
+        android:text="오늘의 로또번호(클릭)"
         android:textSize="20sp"
         />
 
@@ -26,35 +26,36 @@
         android:layout_weight="0.2"
         />
 
-    <LinearLayout
-        android:id="@+id/ll1"
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
+    <Button
+        android:id="@+id/btnExceptRandom"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_weight="0.2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="지난 회차 제외 번호(클릭)"
+        android:textSize="20sp"
         />
 
-    <LinearLayout
-        android:id="@+id/ll2"
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_weight="0.2"
-        />
 
     <LinearLayout
         android:id="@+id/ll3"
-        android:layout_width="match_parent"
-        android:layout_height="39dp"
         android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_weight="0.2"
         />
 
     <LinearLayout
         android:id="@+id/ll4"
+        android:layout_width="match_parent"
+        android:layout_height="39dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_weight="0.2"
+        />
+
+    <LinearLayout
+        android:id="@+id/ll5"
         android:layout_width="match_parent"
         android:layout_height="39dp"
         android:gravity="center"

@@ -1,9 +1,11 @@
 package com.baram.lotto;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(drwNo), new RetrofitRepository.ResponseListener<LottoData>() {
+                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void onSuccessResponse(LottoData lottoData) {
                         try {

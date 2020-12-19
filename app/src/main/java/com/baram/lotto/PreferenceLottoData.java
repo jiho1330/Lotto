@@ -155,7 +155,7 @@ public class PreferenceLottoData {
                                 //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
                             }
                         });
-                        Thread.sleep(70);   // 대기시간이 짧으면 오류 발생할 수 있음.
+                        Thread.sleep(150);   // 대기시간이 짧으면 오류 발생할 수 있음.
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
