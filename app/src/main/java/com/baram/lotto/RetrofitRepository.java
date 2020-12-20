@@ -58,12 +58,7 @@ public class RetrofitRepository {
             @Override
             public void onResponse(Call<LottoData> call, Response<LottoData> response) {
                 if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        LottoData body = response.body();
-                        if (body != null) {
-                            listener.onSuccessResponse(body);
-                        }
-                    }
+                    listener.onSuccessResponse(response.body());
                 }
             }
 
