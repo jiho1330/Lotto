@@ -10,6 +10,9 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 public class QRScanActivity extends AppCompatActivity {
 
     private IntentIntegrator integrator;
@@ -33,12 +36,8 @@ public class QRScanActivity extends AppCompatActivity {
                 finish();
             } else {
                 String uri = result.getContents();
-                Toast.makeText(this, "스캔 결과: " + uri, Toast.LENGTH_SHORT).show();
-                if(!uri.startsWith("http://")){
-                    uri = "http://" + uri;
-                }
-
                 //Intent mIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri)); // 웹으로 실행
+
                 // WebView Activity로 전환
                 Intent mIntent = new Intent(QRScanActivity.this, WebViewActivity.class);
                 mIntent.putExtra("URI", uri);
