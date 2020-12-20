@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="불러오기" />
+            android:text="업데이트" />
 
         <Button
             android:id="@+id/btnLottoHistoryDelete"
@@ -42,12 +42,9 @@
         android:id="@+id/LottoHistoryList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fastScrollEnabled="true"
+        android:fastScrollAlwaysVisible="true"
+        android:choiceMode="multipleChoice"
         android:layout_weight="1" />
-
-    <Button
-        android:id="@+id/btnLottoHistoryView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="더 보기" />
 
 </LinearLayout>
