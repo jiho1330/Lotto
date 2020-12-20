@@ -92,7 +92,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
                 PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
                 items.clear();  // 리스트를 비움
                 adapter.notifyDataSetChanged();
-                Toast.makeText(getApplicationContext(), "저장된 정보가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "리스트가 초기화 되었습니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -120,7 +120,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
 
             try {
                 // Json file 읽어옴
-                InputStream is = getResources().openRawResource(R.raw.lottodata);
+                InputStream is = getAssets().open("lottodata.json");
                 byte[] buffer = new byte[is.available()];
                 is.read(buffer);
                 is.close();
@@ -161,6 +161,37 @@ public class LottoHistoryActivity extends AppCompatActivity {
             //Toast 메세지 알람
             Toast.makeText(getApplicationContext(), "Data Update가 필요합니다.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void updateData() {
+        Gson gson = new Gson();
+
+        try {
+
+            // Json file 읽어옴
+            InputStream is = getAssets().open("lottodata.json");
+
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            is.close();
+
+            // 읽어온 json file의 buffer 값을 String 형식으로 바꿈
+            String json = new String(buffer, "UTF-8");
+
+            // json 문자열을 JsonObject로 변환
+            JSONObject jsonObject = new JSONObject(json);
+
+            // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
+            JSONArray jsonArray = jsonObject.getJSONArray("data");
+
+            if (jsonArray.length() < currentRound)
+            {
+            }
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void callLottoRoundData(int Round) {
