@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(drwNo), new RetrofitRepository.ResponseListener<LottoData>() {
-                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void onSuccessResponse(LottoData lottoData) {
                         try {
