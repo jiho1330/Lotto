@@ -155,11 +155,6 @@ public class PreferenceLottoData {
                     PreferenceManager.setString(mContext, LOTTO_DATA_KEY + (i + 1), text);
             }
 
-            // 전부 불러오면 로딩 종료
-            if (Progress == currentRound) {
-                Toast.makeText(mContext, "최신 데이터를 불러왔습니다.", Toast.LENGTH_SHORT).show();
-            }
-
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
@@ -183,11 +178,6 @@ public class PreferenceLottoData {
                                 String key = LOTTO_DATA_KEY + lottoData.getDrwNo();
                                 // Json String 형식으로 저장
                                 PreferenceManager.setString(mContext, key, gson.toJson(lottoData));
-                            }
-
-                            // 전부 불러오면 로딩 종료
-                            if (Progress == currentRound) {
-                                Toast.makeText(mContext, "최신 데이터를 불러왔습니다.", Toast.LENGTH_SHORT).show();
                             }
                         }
 

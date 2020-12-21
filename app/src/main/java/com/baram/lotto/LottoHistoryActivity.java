@@ -47,7 +47,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         currentRound = mIntent.getIntExtra("currentRound", -1);
 
         // 역대로또정보 불러오기
-        Toast.makeText(getApplicationContext(), "데이터 업데이트 중...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "데이터 동기화...", Toast.LENGTH_SHORT).show();
         new Thread(()-> updateData()).start();
 
         // 역대 로또 정보 버튼
@@ -87,6 +87,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
+                Toast.makeText(getApplicationContext(), "데이터 동기화...", Toast.LENGTH_SHORT).show();
                 updateData();
             }
         });

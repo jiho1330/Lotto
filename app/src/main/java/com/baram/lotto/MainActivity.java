@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         // 광고배너
         AdView adView = (AdView)findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+        //adView.loadAd(adRequest);
 
         // 현재 회차의 당첨결과
         tvTime = findViewById(R.id.tvTime);
