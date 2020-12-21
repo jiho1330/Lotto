@@ -47,8 +47,8 @@ public class LottoHistoryActivity extends AppCompatActivity {
         currentRound = mIntent.getIntExtra("currentRound", -1);
 
         // 역대로또정보 불러오기
-        Toast.makeText(getApplicationContext(), "데이터 동기화...", Toast.LENGTH_SHORT).show();
-        new Thread(()-> updateData()).start();
+        //Toast.makeText(getApplicationContext(), "데이터 동기화...", Toast.LENGTH_SHORT).show();
+        //new Thread(()-> updateData()).start();
 
         // 역대 로또 정보 버튼
         items = new ArrayList<String>();
@@ -71,10 +71,6 @@ public class LottoHistoryActivity extends AppCompatActivity {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                // 아이템이 없으면
-                if (totalItemCount == 0) {
-                    loadMoreData();
-                }
                 // 마지막 아이템이 보이는지 여부
                 lastitemVisibleFlag = (totalItemCount > 0) && (firstVisibleItem + visibleItemCount >= totalItemCount);
             }
@@ -96,15 +92,22 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {   //여기서 클릭 시 행동을 결정
-                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
+                //PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).deleteLottoRoundData();
                 items.clear();  // 리스트를 비움
                 adapter.notifyDataSetChanged();
                 Toast.makeText(getApplicationContext(), "리스트가 초기화 되었습니다.", Toast.LENGTH_SHORT).show();
+
+                // 데이터 로드
+                loadMoreData();
+                listView.smoothScrollToPosition(0);
             }
         });
 
         // 역대로또정보 로드
-        loadMoreData();
+        new Handler().postDelayed(()-> {
+            loadMoreData();
+        }, 500);
+
     }
     
     // 최신 데이터 업데이트
@@ -119,45 +122,37 @@ public class LottoHistoryActivity extends AppCompatActivity {
         int nextRound;
         String text;
 
-        if (currentRound != -1)
-        {
-            // 다음 회차
-            nextRound = currentRound - items.size();
+        // 다음 회차
+        nextRound = currentRound - items.size();
 
-            // 마지막 정보까지 추가가 되었으면
-            if (nextRound <= 0) {
-                Toast.makeText(getApplicationContext(), "마지막 정보입니다.", Toast.LENGTH_SHORT).show();
-                return;
+        // 마지막 정보까지 추가가 되었으면
+        if (nextRound <= 0) {
+            Toast.makeText(getApplicationContext(), "마지막 정보입니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        for (int i = nextRound; i > nextRound - 20 && i > 0; i--) {
+            String mJson = PreferenceManager.getString(getApplicationContext(), PreferenceLottoData.LOTTO_DATA_KEY + (i));
+            if (mJson.equals("")) {
+                continue;
             }
 
-            for (int i = nextRound; i > nextRound - 20 && i > 0; i--) {
-                String mJson = PreferenceManager.getString(getApplicationContext(), PreferenceLottoData.LOTTO_DATA_KEY + (i));
-                if (mJson.equals("")) {
-                    continue;
-                }
+            lottoData = gson.fromJson(mJson, LottoData.class);
 
-                lottoData = gson.fromJson(mJson, LottoData.class);
+            text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
+                    lottoData.getDrwNo(),
+                    lottoData.getDrwtNo1(),
+                    lottoData.getDrwtNo2(),
+                    lottoData.getDrwtNo3(),
+                    lottoData.getDrwtNo4(),
+                    lottoData.getDrwtNo5(),
+                    lottoData.getDrwtNo6(),
+                    lottoData.getBnusNo());
 
-                text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
-                        lottoData.getDrwNo(),
-                        lottoData.getDrwtNo1(),
-                        lottoData.getDrwtNo2(),
-                        lottoData.getDrwtNo3(),
-                        lottoData.getDrwtNo4(),
-                        lottoData.getDrwtNo5(),
-                        lottoData.getDrwtNo6(),
-                        lottoData.getBnusNo());
-
-                items.add(text);
-            }
-
-            adapter.notifyDataSetChanged();
-
+            items.add(text);
         }
-        else
-        {
-            Toast.makeText(getApplicationContext(), "Data Update가 필요합니다.", Toast.LENGTH_SHORT).show();
-        }
+        // UI 적용
+        adapter.notifyDataSetChanged();
     }
     
     private void callLottoRoundData(int Round) {

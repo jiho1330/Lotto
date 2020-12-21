@@ -83,11 +83,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 광고배너
-        AdView adView = (AdView)findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        //adView.loadAd(adRequest);
-
         // 현재 회차의 당첨결과
         tvTime = findViewById(R.id.tvTime);
         tvDate = findViewById(R.id.tvDate);
@@ -98,8 +93,12 @@ public class MainActivity extends AppCompatActivity {
         balls[4] = findViewById(R.id.ball_5);
         balls[5] = findViewById(R.id.ball_6);
         balls[6] = findViewById(R.id.ball_bonus);
-
         getLastLottoNumber(getCurrentRound());
+
+        // 광고배너
+        AdView adView = (AdView)findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        //adView.loadAd(adRequest);
     }
 
     private void getLastLottoNumber(int drwNo) {
