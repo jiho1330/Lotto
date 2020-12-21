@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.Button;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 
 import com.baram.lotto.model.LottoData;
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +45,10 @@ public class LottoHistoryActivity extends AppCompatActivity {
         // 이전 Activity에서 넘겨 받은 값을 가져옴 : 현재 회차
         Intent mIntent = getIntent();
         currentRound = mIntent.getIntExtra("currentRound", -1);
+
+        // 역대로또정보 불러오기
+        Toast.makeText(getApplicationContext(), "데이터 업데이트 중...", Toast.LENGTH_SHORT).show();
+        new Thread(()-> updateData()).start();
 
         // 역대 로또 정보 버튼
         items = new ArrayList<String>();
@@ -80,8 +87,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
-                Toast.makeText(getApplicationContext(), "로또 정보 불러오는 중...", Toast.LENGTH_SHORT).show();
-                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundDataProgress(currentRound);
+                updateData();
             }
         });
 
@@ -96,8 +102,13 @@ public class LottoHistoryActivity extends AppCompatActivity {
             }
         });
 
-        // 초기데이터 로드
+        // 역대로또정보 로드
         loadMoreData();
+    }
+    
+    // 최신 데이터 업데이트
+    private void updateData() {
+        PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundData(currentRound);
     }
     
     // 역대로또정보 로드
@@ -113,87 +124,41 @@ public class LottoHistoryActivity extends AppCompatActivity {
             nextRound = currentRound - items.size();
 
             // 마지막 정보까지 추가가 되었으면
-            if (nextRound == 0) {
+            if (nextRound <= 0) {
                 Toast.makeText(getApplicationContext(), "마지막 정보입니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            try {
-                // Json file 읽어옴
-                InputStream is = getAssets().open("lottodata.json");
-                byte[] buffer = new byte[is.available()];
-                is.read(buffer);
-                is.close();
-
-                // 읽어온 json file의 buffer 값을 String 형식으로 바꿈
-                String json = new String(buffer, "UTF-8");
-
-                // json 문자열을 JsonObject로 변환
-                JSONObject jsonObject = new JSONObject(json);
-
-                // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
-                JSONArray jsonArray = jsonObject.getJSONArray("data");
-
-                for (int i = nextRound; i > nextRound - 20 && i > 0; i--) {
-                    lottoData = gson.fromJson(jsonArray.get(i - 1).toString(), LottoData.class);
-
-                    text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
-                            lottoData.getDrwNo(),
-                            lottoData.getDrwtNo1(),
-                            lottoData.getDrwtNo2(),
-                            lottoData.getDrwtNo3(),
-                            lottoData.getDrwtNo4(),
-                            lottoData.getDrwtNo5(),
-                            lottoData.getDrwtNo6(),
-                            lottoData.getBnusNo());
-
-                    items.add(text);
+            for (int i = nextRound; i > nextRound - 20 && i > 0; i--) {
+                String mJson = PreferenceManager.getString(getApplicationContext(), PreferenceLottoData.LOTTO_DATA_KEY + (i));
+                if (mJson.equals("")) {
+                    continue;
                 }
-                adapter.notifyDataSetChanged();
 
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
+                lottoData = gson.fromJson(mJson, LottoData.class);
+
+                text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
+                        lottoData.getDrwNo(),
+                        lottoData.getDrwtNo1(),
+                        lottoData.getDrwtNo2(),
+                        lottoData.getDrwtNo3(),
+                        lottoData.getDrwtNo4(),
+                        lottoData.getDrwtNo5(),
+                        lottoData.getDrwtNo6(),
+                        lottoData.getBnusNo());
+
+                items.add(text);
             }
+
+            adapter.notifyDataSetChanged();
 
         }
         else
         {
-            //Toast 메세지 알람
             Toast.makeText(getApplicationContext(), "Data Update가 필요합니다.", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private void updateData() {
-        Gson gson = new Gson();
-
-        try {
-
-            // Json file 읽어옴
-            InputStream is = getAssets().open("lottodata.json");
-
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            is.close();
-
-            // 읽어온 json file의 buffer 값을 String 형식으로 바꿈
-            String json = new String(buffer, "UTF-8");
-
-            // json 문자열을 JsonObject로 변환
-            JSONObject jsonObject = new JSONObject(json);
-
-            // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
-            JSONArray jsonArray = jsonObject.getJSONArray("data");
-
-            if (jsonArray.length() < currentRound)
-            {
-            }
-
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-
+    
     private void callLottoRoundData(int Round) {
         RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.ResponseListener<LottoData>() {
             @Override

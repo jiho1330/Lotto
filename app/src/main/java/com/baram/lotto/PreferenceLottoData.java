@@ -10,6 +10,15 @@ import android.widget.Toast;
 import com.baram.lotto.model.LottoData;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PreferenceLottoData {
@@ -84,8 +93,8 @@ public class PreferenceLottoData {
         // UI Thread에서 실행, doInBackground 종료 후 바로 호출
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            progressDialog.dismiss();       // ProgressDialog 지우기
-
+            if (progressDialog != null)
+                progressDialog.dismiss();       // ProgressDialog 지우기
             //progressBar.setProgress(20);
             //progress_value.setText(progressBar.getProgress()+"%");
         }
@@ -116,55 +125,85 @@ public class PreferenceLottoData {
     {
         Gson gson = new Gson();
 
-        // 현재회차가 있으면
-        if (currentRound != -1) {
-            LastRound = String.valueOf(currentRound);
-            PreferenceManager.setString(mContext, LOTTO_DATA_LAST_ROUND, LastRound);     // 마지막 회차
+        LastRound = String.valueOf(currentRound);
+        PreferenceManager.setString(mContext, LOTTO_DATA_LAST_ROUND, LastRound);     // 마지막 회차
+
+        // lottodata.json 파일에서 최신회차 읽어오기
+        try {
+
+            InputStream is = mContext.getAssets().open("lottodata.json");
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            is.close();
+
+            // 읽어온 json file의 buffer 값을 String 형식으로 바꿈
+            String json = new String(buffer, "UTF-8");
+
+            // json 문자열을 JsonObject로 변환
+            JSONObject jsonObject = new JSONObject(json);
+
+            // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
+            JSONArray jsonArray = jsonObject.getJSONArray("data");
+
+            String text;
             Progress = 0;
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Progress++;
+                text = jsonArray.getString(i);
 
-            new Thread(() -> {
-                for (int i = currentRound; i > 0; i--) {
-                    Progress++;
-                    try {
+                if (!text.equals(""))
+                    PreferenceManager.setString(mContext, LOTTO_DATA_KEY + (i + 1), text);
+            }
 
-                        // 회차정보가 존재하면 반복문 종료
-                        if (!PreferenceManager.getString(mContext, LOTTO_DATA_KEY + i).equals("")) {
-                            progress_task.onPostExecute(null);
-                            break;
-                        }
+            // 전부 불러오면 로딩 종료
+            if (Progress == currentRound) {
+                Toast.makeText(mContext, "최신 데이터를 불러왔습니다.", Toast.LENGTH_SHORT).show();
+            }
 
-                        RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(i), new RetrofitRepository.ResponseListener<LottoData>() {
-                            @Override
-                            public void onSuccessResponse(LottoData lottoData) {
-                                if (lottoData.getReturnValue().equals("success")) {
-                                    String key = LOTTO_DATA_KEY + lottoData.getDrwNo();
-                                    // Json String 형식으로 저장
-                                    PreferenceManager.setString(mContext, key, gson.toJson(lottoData));
-                                }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
 
-                                Log.i("Progress", "Now: " + Progress + " > " + lottoData.getReturnValue());
-                                progress_task.doInBackground(Progress, currentRound);
-                                // 전부 불러오면 로딩 종료
-                                if (Progress == currentRound) {
-                                    progress_task.onPostExecute(null);
-                                }
-                            }
+        // lottodata.json 파일에 없는 최신 데이터를 api 호출을 통해 가져옴
+        int startIdx = Progress + 1;
+        new Thread(() -> {
+            for (int i = startIdx; i <= currentRound; i++) {
+                Progress++;
+                try {
 
-                            @Override
-                            public void onFailResponse() {
-                                //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        Thread.sleep(150);   // 대기시간이 짧으면 오류 발생할 수 있음.
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    // 회차정보가 존재하면 반복문 스킵
+                    if (!PreferenceManager.getString(mContext, LOTTO_DATA_KEY + i).equals("")) {
+                        continue;
                     }
 
-                }
-            }).start();
+                    RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(i), new RetrofitRepository.ResponseListener<LottoData>() {
+                        @Override
+                        public void onSuccessResponse(LottoData lottoData) {
+                            if (lottoData.getReturnValue().equals("success")) {
+                                String key = LOTTO_DATA_KEY + lottoData.getDrwNo();
+                                // Json String 형식으로 저장
+                                PreferenceManager.setString(mContext, key, gson.toJson(lottoData));
+                            }
 
-        }
+                            // 전부 불러오면 로딩 종료
+                            if (Progress == currentRound) {
+                                Toast.makeText(mContext, "최신 데이터를 불러왔습니다.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailResponse() {
+                            //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    Thread.sleep(100);   // 대기시간이 짧으면 오류 발생할 수 있음.
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
 
 //        int nLastRound;
 //        int Round;
