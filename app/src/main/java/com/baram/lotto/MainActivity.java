@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baram.lotto.model.LottoData;
 import com.google.android.gms.ads.AdRequest;
@@ -53,9 +54,24 @@ public class MainActivity extends AppCompatActivity {
         btnMapView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
-                // 주변 지도보기 화면으로 전환
-                startActivity(mIntent);
+                // DaumMapEngineApi.so는 arm 및 armv7 기기만 지원
+                Boolean isAvailable = false;
+                for (String abi: Build.SUPPORTED_ABIS) {
+                    if (abi.contains("arm")) {
+                        isAvailable = true;
+                        break;
+                    }
+                }
+
+                // 지원하는 기기이면
+                if (isAvailable) {
+                    Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
+                    // 주변 지도보기 화면으로 전환
+                    startActivity(mIntent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "현재 기기에서는 사용할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 

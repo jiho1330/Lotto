@@ -54,7 +54,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
     private List<Location.Document> mDocList = new ArrayList<>();
     private int mRadius = 0;    // 반경
     MapPoint mLocation; // 현재 위치
-    private boolean canExecute;
+    private boolean canExecute; // 위치 찾기 사용가능여부
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +103,7 @@ public class MapViewActivity extends AppCompatActivity implements MapView.Curren
         mapView.setPOIItemEventListener(this);  // Marker 이벤트 설정
         mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter());    // 콜아웃 벌룬 어뎁터 설정
 
+        // 위치 찾기 사용가능여부
         canExecute = true;
 
         if (!checkLocationServicesStatus()) {
