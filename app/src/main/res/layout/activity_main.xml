@@ -11,17 +11,15 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_height="wrap_content"
         android:background="@color/main"
-        android:gravity="center"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,7 +32,7 @@
                     android:layout_height="wrap_content"
                     android:text="오늘의 "
                     android:textColor="#FFFFFF"
-                    android:textSize="42sp"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -43,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:text="로또"
                     android:textColor="#FFEB3B"
-                    android:textSize="42sp"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -53,7 +51,7 @@
                     android:layout_weight="1"
                     android:text="로"
                     android:textColor="#FFFFFF"
-                    android:textSize="42sp"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -64,7 +62,7 @@
                 android:text="로또번호 추천받고"
                 android:textColor="#FFFFFF"
                 android:textIsSelectable="false"
-                android:textSize="42sp"
+                android:textSize="30sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -78,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:text="1등"
                     android:textColor="#8BC34A"
-                    android:textSize="42sp"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -88,7 +86,7 @@
                     android:layout_weight="1"
                     android:text="이 되세요!"
                     android:textColor="#FFFFFF"
-                    android:textSize="42sp"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -100,9 +98,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            ads2:layout_constraintBottom_toTopOf="@+id/btnLotto"
-            ads2:layout_constraintEnd_toEndOf="parent"
-            ads2:layout_constraintStart_toStartOf="parent">
+            android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -238,100 +234,167 @@
             </LinearLayout>
         </LinearLayout>
 
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:background="#E5E5E5"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="내 로또 >"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
+                android:layout_height="100dp"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btnLotto"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
                     android:background="@drawable/button_round"
                     android:backgroundTint="@color/white"
-                    android:padding="15dp"
-                    android:text="오늘의 로또번호"
-                    android:textColor="#2196F3"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:padding="5dp"
+                    android:text="오늘의\n로또번호"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/btnQRCode"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="QR코드"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
             </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="로또 정보 >"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:gravity="center"
+                android:layout_height="100dp"
                 android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/btnQRCode"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:scaleType="fitCenter"
-                    ads2:srcCompat="@drawable/qrcode" />
+                <Button
+                    android:id="@+id/btnMapView"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="주변\n판매점"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/btnLottoHistory"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="당첨번호"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="설정 >"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnVerion"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="버전"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="기타 >"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnQnA"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="Q&amp;A"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/btnRate"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="평가하기"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
             </LinearLayout>
 
         </LinearLayout>
+    </ScrollView>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="3"
-        android:background="#E5E5E5"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:id="@+id/tvCategory1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="로또 정보 >"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnMapView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:background="@drawable/button_round"
-                android:backgroundTint="@color/white"
-                android:padding="5dp"
-                android:text="주변 \n판매점"
-                android:textColor="@color/black"
-                android:textSize="24sp" />
-
-            <Button
-                android:id="@+id/btnLottoHistory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:background="@drawable/button_round"
-                android:backgroundTint="@color/white"
-                android:padding="5dp"
-                android:text="역대 \n로또 정보"
-                android:textColor="@color/black"
-                android:textSize="24sp" />
-        </LinearLayout>
-    </LinearLayout>
 
     <!--    <com.google.android.gms.ads.AdView-->
     <!--        xmlns:ads="http://schemas.android.com/apk/res-auto"-->
@@ -347,9 +410,8 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="45dp"
-        android:paddingRight="20dp">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/adView"

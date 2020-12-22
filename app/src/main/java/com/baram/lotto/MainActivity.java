@@ -3,7 +3,12 @@ package com.baram.lotto;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,8 +21,10 @@ import android.widget.Toast;
 
 import com.baram.lotto.model.LottoData;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -26,13 +33,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
-    Button btnLotto, btnMapView, btnLottoHistory;
-    ImageButton btnQRCode;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private Button btnLotto, btnQRCode, btnMapView, btnLottoHistory, btnVersion, btnQnA, btnRate;
+    private Button[] balls = new Button[7];
     private AdView mAdView;
     private InterstitialAd mInterstitialAd;
     private TextView tvTime, tvDate;
-    private Button[] balls = new Button[7];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,63 +47,31 @@ public class MainActivity extends AppCompatActivity {
 
         // 로또번호추첨
         btnLotto = findViewById(R.id.btnLotto);
-        btnLotto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent rIntent = new Intent(getApplicationContext(), RandomLottoActivity.class);
-                startActivity(rIntent);
-            }
-        });
+        btnLotto.setOnClickListener(this);
 
         // 주변 판매점 버튼
         btnMapView = findViewById(R.id.btnMapView);
-        btnMapView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // DaumMapEngineApi.so는 arm 및 armv7 기기만 지원
-                Boolean isAvailable = false;
-                for (String abi: Build.SUPPORTED_ABIS) {
-                    if (abi.contains("arm")) {
-                        isAvailable = true;
-                        break;
-                    }
-                }
-
-                // 지원하는 기기이면
-                if (isAvailable) {
-                    Intent mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
-                    // 주변 지도보기 화면으로 전환
-                    startActivity(mIntent);
-                } else {
-                    Toast.makeText(getApplicationContext(), "현재 기기에서는 사용할 수 없습니다.", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
+        btnMapView.setOnClickListener(this);
 
         // 역대 로또 정보 버튼
         btnLottoHistory = findViewById(R.id.btnLottoHistory);
-        btnLottoHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
-
-                mIntent.putExtra("currentRound", getCurrentRound());
-                // 역대 로또 정보 화면으로 전환
-                startActivity(mIntent);
-            }
-        });
+        btnLottoHistory.setOnClickListener(this);
 
         // QR코드 스캔 버튼
         btnQRCode = findViewById(R.id.btnQRCode);
-        btnQRCode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent mIntent = new Intent(getApplicationContext(), QRScanActivity.class);
-                // QR Code Scan 화면으로 전환
-                startActivity(mIntent);
-            }
-        });
+        btnQRCode.setOnClickListener(this);
+
+        // 버전 버튼
+        btnVersion = findViewById(R.id.btnVerion);
+        btnVersion.setOnClickListener(this);
+
+        // Q&A 버튼
+        btnQnA = findViewById(R.id.btnQnA);
+        btnQnA.setOnClickListener(this);
+
+        // 평가하기 버튼
+        btnRate = findViewById(R.id.btnRate);
+        btnRate.setOnClickListener(this);
 
         // 현재 회차의 당첨결과
         tvTime = findViewById(R.id.tvTime);
@@ -113,8 +87,11 @@ public class MainActivity extends AppCompatActivity {
 
         // 광고배너
         AdView adView = (AdView)findViewById(R.id.adView);
+        if (!BuildConfig.DEBUG) {
+            adView.setAdUnitId("진짜 광고 ID");
+        }
         AdRequest adRequest = new AdRequest.Builder().build();
-        //adView.loadAd(adRequest);
+        adView.loadAd(adRequest);
     }
 
     private void getLastLottoNumber(int drwNo) {
@@ -191,5 +168,69 @@ public class MainActivity extends AppCompatActivity {
         int weekDiff = (int)(milliDiff / (1000 * 60 * 60 * 24 * 7));
 
         return weekDiff + 1;
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent mIntent;
+
+        switch (v.getId()) {
+            case R.id.btnLotto:
+                mIntent = new Intent(getApplicationContext(), RandomLottoActivity.class);
+                startActivity(mIntent);
+                break;
+            case R.id.btnLottoHistory:
+                mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
+
+                mIntent.putExtra("currentRound", getCurrentRound());
+                // 역대 로또 정보 화면으로 전환
+                startActivity(mIntent);
+                break;
+            case R.id.btnMapView:
+                // DaumMapEngineApi.so는 arm 및 armv7 기기만 지원
+                Boolean isAvailable = false;
+                for (String abi: Build.SUPPORTED_ABIS) {
+                    if (abi.contains("arm")) {
+                        isAvailable = true;
+                        break;
+                    }
+                }
+
+                // 지원하는 기기이면
+                if (isAvailable) {
+                    mIntent = new Intent(getApplicationContext(), MapViewActivity.class);
+                    // 주변 지도보기 화면으로 전환
+                    startActivity(mIntent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "현재 기기에서는 사용할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.btnQRCode:
+                mIntent = new Intent(getApplicationContext(), QRScanActivity.class);
+                // QR Code Scan 화면으로 전환
+                startActivity(mIntent);
+                break;
+            case R.id.btnVerion:
+                PackageInfo pi = null;
+                try {
+                    pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("현재 버전");
+                    alert.setMessage("V" + pi.versionName);
+                    alert.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                    });
+                    alert.show();
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case R.id.btnQnA:
+            case R.id.btnRate:
+                Toast.makeText(getApplicationContext(), "미구현 기능입니다.", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 }
