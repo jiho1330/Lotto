@@ -24,24 +24,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class PreferenceLottoData {
     private Context mContext;
     private static PreferenceLottoData INSTANCE;
+    private static Progress_Task progress_task;
+    private JSONArray jsonArray;
 
-    private String LastRound = "-1";
+    private int lastRound;
     private int Progress;
+    private Gson gson = new Gson();
 
     //Key 포맷 LottoData_Round숫자_항목
     public static final String LOTTO_DATA_KEY           = "LottoData_Round";
-    public static final String LOTTO_DATA_LAST_ROUND    = "LottoData_Last_Round";
-    public static final String LOTTO_DATA_DATE          = "_Date";
-    public static final String LOTTO_DATA_TOTALSELLAMNT = "_TotalSellamnt";
-    public static final String LOTTO_DATA_FIRSTWINAMNT  = "_FirstWinamnt";
-    public static final String LOTTO_DATA_FIRSTPRZWNERCO= "_FirstPrzwnerCo";
-    public static final String LOTTO_DATA_DRWTNO_1      = "_DRWTNO_1";
-    public static final String LOTTO_DATA_DRWTNO_2      = "_DRWTNO_2";
-    public static final String LOTTO_DATA_DRWTNO_3      = "_DRWTNO_3";
-    public static final String LOTTO_DATA_DRWTNO_4      = "_DRWTNO_4";
-    public static final String LOTTO_DATA_DRWTNO_5      = "_DRWTNO_5";
-    public static final String LOTTO_DATA_DRWTNO_6      = "_DRWTNO_6";
-    public static final String LOTTO_DATA_BNUSNO        = "_BnusNo";
 
     class Progress_Task extends AsyncTask<Integer, Integer, Void> {
         private ProgressDialog progressDialog = null;       // 원형 ProgressBar 생성
@@ -55,11 +46,13 @@ public class PreferenceLottoData {
             try {
                 // ProgressDialog 생성, 레이아웃 변경
                 progressDialog = new ProgressDialog(mContext, android.R.style.Theme_Material_Dialog_Alert);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);      // Style - 원 모양 설정
-                progressDialog.setMessage("Now Update...");                         // Message - 표시할 텍스트
+                //progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);      // Style - 원 모양 설정
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);      // Style - 수평
+                progressDialog.setMax(lastRound);
+                progressDialog.setMessage("데이터 동기화...");                         // Message - 표시할 텍스트
                 progressDialog.setCanceledOnTouchOutside(false);                    // 터치시 Canceled 막기
                 progressDialog.show();  // UI 표시
-            } catch (Exception e) {
+            } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
 
@@ -68,15 +61,21 @@ public class PreferenceLottoData {
         @Override
         // 백그라운드 작업 시작, UI 조작 불가, onPreExcute() 종료후 바로 호출
         protected Void doInBackground(Integer... ints) {
-            for (int i = 0; i < 4; i++) {
-                try {
-                    // UI Update, publishProgress() - onProgressUpdate 호출
-                    //publishProgress(ints[0]);
-                    progressDialog.setMessage(String.format("Now Update...[%d/%d]", ints[0], ints[1]));
-                    //Thread.sleep(500);                  // 0.5초 간격 UI Update
-                } catch (Exception e) {
-                    e.printStackTrace();
+            try {
+                // UI Update, publishProgress() - onProgressUpdate 호출
+                for (int i = 1; i <= jsonArray.length(); i++) {
+                    publishProgress(i);
+                    updateFromJson(i);
+                    Thread.sleep(1);
                 }
+
+                for (int i = jsonArray.length() + 1; i <= lastRound; i++) {
+                    publishProgress(i);
+                    updateFromApi(i);
+                    Thread.sleep(70);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             return null;
         }
@@ -85,49 +84,109 @@ public class PreferenceLottoData {
         // UI 조작가능 (UI Thread에서 실행)
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            //progressBar.incrementProgressBy(values[0]);
-            //progress_value.setText(progressBar.getProgress()+"%");
+            progressDialog.setMessage(String.format("데이터 동기화...[%d/%d]", values[0], lastRound));
+            progressDialog.setProgress(values[0]);
         }
 
         @Override
         // UI Thread에서 실행, doInBackground 종료 후 바로 호출
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            if (progressDialog != null)
+            if (progressDialog != null) {
                 progressDialog.dismiss();       // ProgressDialog 지우기
-            //progressBar.setProgress(20);
-            //progress_value.setText(progressBar.getProgress()+"%");
+                Toast.makeText(mContext, "동기화 완료", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
-    Progress_Task progress_task;
-
-    public static PreferenceLottoData getPreferenceLottoData(Context context){
+    public static PreferenceLottoData getPreferenceLottoData(Context context) {
         if(INSTANCE == null){
             INSTANCE = new PreferenceLottoData(context);
         }
         return INSTANCE;
     }
 
-    private PreferenceLottoData(Context context){
+    private PreferenceLottoData(Context context) {
+        try {
+            mContext = context;
+            if (progress_task == null) {
+                progress_task = new Progress_Task();
+            }
+
+            InputStream is = mContext.getAssets().open("lottodata.json");
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            is.close();
+
+            // 읽어온 json file의 buffer 값을 String 형식으로 바꿈
+            String json = new String(buffer, "UTF-8");
+
+            // json 문자열을 JsonObject로 변환
+            JSONObject jsonObject = new JSONObject(json);
+
+            // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
+            jsonArray = jsonObject.getJSONArray("data");
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void updateWithProgress(Context context, int currentRound)
+    {
         mContext = context;
-        LastRound = PreferenceManager.getString(mContext, LOTTO_DATA_LAST_ROUND);
+        this.lastRound = currentRound;
         progress_task = new Progress_Task();
+        progress_task.execute();
     }
 
-    public void updateLottoRoundDataProgress(int currentRound)
-    {
-        progress_task.onPreExecute();
-        updateLottoRoundData(currentRound);
+    // Json 파일로 데이터 업데이트
+    public void updateFromJson(int round) {
+
+        try {
+            String text = jsonArray.getString(round - 1);
+
+            if (!text.equals(""))
+                PreferenceManager.setString(mContext, LOTTO_DATA_KEY + round, text);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public void updateLottoRoundData(int currentRound)
+    // Api 호출로 데이터 업데이트
+    public void updateFromApi(int round) {
+        try {
+            // 회차정보가 존재하면 종료
+            if (!PreferenceManager.getString(mContext, LOTTO_DATA_KEY + round).equals("")) {
+                return;
+            }
+
+            RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(round), new RetrofitRepository.ResponseListener<LottoData>() {
+                @Override
+                public void onSuccessResponse(LottoData lottoData) {
+                    if (lottoData.getReturnValue().equals("success")) {
+                        String key = LOTTO_DATA_KEY + round;
+                        // Json String 형식으로 저장
+                        PreferenceManager.setString(mContext, key, gson.toJson(lottoData));
+                    }
+                }
+
+                @Override
+                public void onFailResponse() {
+                    //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateLottoData(int currentRound)
     {
-        Gson gson = new Gson();
-
-        LastRound = String.valueOf(currentRound);
-        PreferenceManager.setString(mContext, LOTTO_DATA_LAST_ROUND, LastRound);     // 마지막 회차
-
         // lottodata.json 파일에서 최신회차 읽어오기
         try {
 
@@ -143,7 +202,7 @@ public class PreferenceLottoData {
             JSONObject jsonObject = new JSONObject(json);
 
             // JsonObject의 "data" 값을 JsonArray 형식으로 가져옴
-            JSONArray jsonArray = jsonObject.getJSONArray("data");
+            jsonArray = jsonObject.getJSONArray("data");
 
             String text;
             Progress = 0;
@@ -165,7 +224,6 @@ public class PreferenceLottoData {
             for (int i = startIdx; i <= currentRound; i++) {
                 Progress++;
                 try {
-
                     // 회차정보가 존재하면 반복문 스킵
                     if (!PreferenceManager.getString(mContext, LOTTO_DATA_KEY + i).equals("")) {
                         continue;
@@ -195,97 +253,17 @@ public class PreferenceLottoData {
             }
         }).start();
 
-//        int nLastRound;
-//        int Round;
-//        if(LastRound == "")
-//            nLastRound = -1;
-//        else
-//            nLastRound = Integer.parseInt(LastRound);
-//
-//        if(nLastRound == -1)
-//            Round = 1;
-//        else
-//            Round = nLastRound + 1;
-//
-//        String Key = LOTTO_DATA_KEY + Round;
-        //progress_task.doInBackground(Round);
-//        RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(Round), new RetrofitRepository.ResponseListener<LottoData>() {
-//            @Override
-//            public void onSuccessResponse(LottoData lottoData) {
-//                if(!lottoData.getReturnValue().equals("fail"))
-//                {
-//                    LastRound = Integer.toString(Round);
-//
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_LAST_ROUND,                 LastRound);     //로또 당첨 일시
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DATE,            lottoData.getDrwNoDate());     //로또 당첨 일시
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_TOTALSELLAMNT,   lottoData.getTotSellamnt());     //누적 상금
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTWINAMNT,    lottoData.getFirstWinamnt());     //1등 당첨금
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_FIRSTPRZWNERCO,  lottoData.getFirstPrzwnerCo());     //1등 당첨 인원
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_1,        lottoData.getDrwtNo1());     //로또 번호 1
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_2,        lottoData.getDrwtNo2());     //로또 번호 2
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_3,        lottoData.getDrwtNo3());     //로또 번호 3
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_4,        lottoData.getDrwtNo4());     //로또 번호 4
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_5,        lottoData.getDrwtNo5());     //로또 번호 5
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_DRWTNO_6,        lottoData.getDrwtNo6());     //로또 번호 6
-//                    PreferenceManager.setString(mContext, Key + LOTTO_DATA_BNUSNO,          lottoData.getBnusNo());     //보너스 번호
-//                    Log.i("updateLottoRoundData", "Success Round : " + Round);
-//                    updateLottoRoundData(-1);
-//                }
-//                else {
-//                    Log.i("updateLottoRoundData", "Finish Round : " + Round);
-//                    Void result = null;
-//                    progress_task.onPostExecute(result);
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onFailResponse() {
-//                //showToastMessage("데이터를 가져오지 못했습니다.", Toast.LENGTH_SHORT);
-//                //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-    }
-
-    public void deleteLottoRoundData()
-    {
-        PreferenceManager.clear(mContext);
-        Log.i("deleteLottoRoundData", "Delete Round Data");
-        LastRound = "-1";
     }
 
     public LottoData getLottoRoundData(int Round)
     {
-        //라운드로 Key 생성
-        //Key 포맷 LottoData_Round숫자_항목
+        // 라운드로 Key 생성
         String Key = LOTTO_DATA_KEY + Round;
-        LottoData lottoData;
 
-        Gson gson = new Gson();
-        String json = PreferenceManager.getString(mContext, Key);
-        lottoData = gson.fromJson(json, LottoData.class);
-
-//        lottoData.setDrwNo(String.valueOf(Round));
-//        lottoData.setDrwNoDate(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DATE));
-//        lottoData.setTotSellamnt(PreferenceManager.getString(mContext, Key + LOTTO_DATA_TOTALSELLAMNT));
-//        lottoData.setFirstWinamnt(PreferenceManager.getString(mContext, Key + LOTTO_DATA_FIRSTWINAMNT));
-//        lottoData.setFirstPrzwnerCo(PreferenceManager.getString(mContext, Key + LOTTO_DATA_FIRSTPRZWNERCO));
-//        lottoData.setDrwtNo1(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_1));
-//        lottoData.setDrwtNo2(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_2));
-//        lottoData.setDrwtNo3(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_3));
-//        lottoData.setDrwtNo4(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_4));
-//        lottoData.setDrwtNo5(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_5));
-//        lottoData.setDrwtNo6(PreferenceManager.getString(mContext, Key + LOTTO_DATA_DRWTNO_6));
-//        lottoData.setBnusNo(PreferenceManager.getString(mContext, Key + LOTTO_DATA_BNUSNO));
+        // Preference에서 로또정보 가져오기
+        String mJson = PreferenceManager.getString(mContext, Key);
+        LottoData lottoData = gson.fromJson(mJson, LottoData.class);
 
         return lottoData;
-    }
-
-    public int getLottoLastRound()
-    {
-        if(LastRound.equals(""))
-            return -1;
-        else
-            return Integer.parseInt(LastRound);
     }
 }

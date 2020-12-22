@@ -18,7 +18,7 @@ public class SplashActivity extends AppCompatActivity {
 
         // 로또정보 동기화
         new Thread(()-> {
-            PreferenceLottoData.getPreferenceLottoData(SplashActivity.this).updateLottoRoundData(getCurrentRound());
+            PreferenceLottoData.getPreferenceLottoData(SplashActivity.this).updateLottoData(getCurrentRound());
         }).start();
 
         // 2초 뒤 메인화면 이동

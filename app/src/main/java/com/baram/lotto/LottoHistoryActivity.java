@@ -83,8 +83,8 @@ public class LottoHistoryActivity extends AppCompatActivity {
         btnLottoHistoryUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)  {   //여기서 클릭 시 행동을 결정
-                Toast.makeText(getApplicationContext(), "데이터 동기화...", Toast.LENGTH_SHORT).show();
-                updateData();
+                PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateWithProgress(LottoHistoryActivity.this, currentRound);
+                //updateData();
             }
         });
 
@@ -104,15 +104,12 @@ public class LottoHistoryActivity extends AppCompatActivity {
         });
 
         // 역대로또정보 로드
-        new Handler().postDelayed(()-> {
-            loadMoreData();
-        }, 500);
-
+        loadMoreData();
     }
     
     // 최신 데이터 업데이트
     private void updateData() {
-        PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoRoundData(currentRound);
+        PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).updateLottoData(currentRound);
     }
     
     // 역대로또정보 로드
@@ -132,12 +129,7 @@ public class LottoHistoryActivity extends AppCompatActivity {
         }
 
         for (int i = nextRound; i > nextRound - 20 && i > 0; i--) {
-            String mJson = PreferenceManager.getString(getApplicationContext(), PreferenceLottoData.LOTTO_DATA_KEY + (i));
-            if (mJson.equals("")) {
-                continue;
-            }
-
-            lottoData = gson.fromJson(mJson, LottoData.class);
+            lottoData = PreferenceLottoData.getPreferenceLottoData(LottoHistoryActivity.this).getLottoRoundData(i);
 
             text = String.format("%s회 [%s] [%s] [%s] [%s] [%s] [%s] 보너스 [%s]",
                     lottoData.getDrwNo(),
