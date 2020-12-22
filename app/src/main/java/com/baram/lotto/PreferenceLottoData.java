@@ -74,6 +74,8 @@ public class PreferenceLottoData {
                     updateFromApi(i);
                     Thread.sleep(70);
                 }
+
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

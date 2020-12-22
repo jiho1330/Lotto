@@ -3,18 +3,33 @@ package com.baram.lotto;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class SplashActivity extends AppCompatActivity {
+    TextView tv_version;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        tv_version = findViewById(R.id.tv_version);
+        PackageInfo pi = null;
+        try {
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+            tv_version.setText("Version: " + pi.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
         // 로또정보 동기화
         new Thread(()-> {
