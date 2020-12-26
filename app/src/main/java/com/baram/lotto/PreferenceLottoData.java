@@ -66,7 +66,6 @@ public class PreferenceLottoData {
                 for (int i = 1; i <= jsonArray.length(); i++) {
                     publishProgress(i);
                     updateFromJson(i);
-                    Thread.sleep(1);
                 }
 
                 for (int i = jsonArray.length() + 1; i <= lastRound; i++) {
