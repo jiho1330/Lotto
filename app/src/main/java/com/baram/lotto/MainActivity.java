@@ -96,59 +96,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void getLastLottoNumber(int drwNo) {
         // UI 작업을 위해 runOnUiThread 사용
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(drwNo), new RetrofitRepository.ResponseListener<LottoData>() {
-                    @Override
-                    public void onSuccessResponse(LottoData lottoData) {
-                        try {
-                            if (lottoData.getReturnValue().equals("fail")) {
-                                if (drwNo > 1)
-                                    getLastLottoNumber(drwNo - 1);
-                                return;
-                            }
-
-                            // 회차
-                            tvTime.setText(drwNo + "회");
-                            String[] ydm = lottoData.getDrwNoDate().split("-");
-                            // 추첨일
-                            tvDate.setText(String.format("(%s년 %s월 %s일 추첨)", ydm[0], ydm[1], ydm[2]));
-
-                            // 당첨번호 + 보너스
-                            balls[0].setText(lottoData.getDrwtNo1());
-                            balls[1].setText(lottoData.getDrwtNo2());
-                            balls[2].setText(lottoData.getDrwtNo3());
-                            balls[3].setText(lottoData.getDrwtNo4());
-                            balls[4].setText(lottoData.getDrwtNo5());
-                            balls[5].setText(lottoData.getDrwtNo6());
-                            balls[6].setText(lottoData.getBnusNo());
-
-                            for (Button btn: balls) {
-                                int num = Integer.parseInt(btn.getText().toString());
-                                if (num <= 10) {
-                                    btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_1)));
-                                } else if (num <= 20) {
-                                    btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_2)));
-                                } else if (num <= 30) {
-                                    btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_3)));
-                                } else if (num <= 40) {
-                                    btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_4)));
-                                } else {
-                                    btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_5)));
-                                }
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        runOnUiThread(() -> {
+            RetrofitRepository.getINSTANCE().getLottoRoundData(Integer.toString(drwNo), new RetrofitRepository.ResponseListener<LottoData>() {
+                @Override
+                public void onSuccessResponse(LottoData lottoData) {
+                    try {
+                        if (lottoData.getReturnValue().equals("fail")) {
+                            if (drwNo > 1)
+                                getLastLottoNumber(drwNo - 1);
+                            return;
                         }
-                    }
 
-                    @Override
-                    public void onFailResponse() {
-                        //Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.fail_result), Toast.LENGTH_SHORT).show();
+                        // 회차
+                        tvTime.setText(drwNo + "회");
+                        String[] ydm = lottoData.getDrwNoDate().split("-");
+                        // 추첨일
+                        tvDate.setText(String.format("(%s년 %s월 %s일 추첨)", ydm[0], ydm[1], ydm[2]));
+
+                        // 당첨번호 + 보너스
+                        for (int i = 0; i < 7; i++) {
+                            balls[i].setText(lottoData.getNumber(i+1));
+                        }
+
+                        for (Button btn: balls) {
+                            int num = Integer.parseInt(btn.getText().toString());
+                            if (num <= 10) {
+                                btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_1)));
+                            } else if (num <= 20) {
+                                btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_2)));
+                            } else if (num <= 30) {
+                                btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_3)));
+                            } else if (num <= 40) {
+                                btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_4)));
+                            } else {
+                                btn.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ball_5)));
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                });
-            }
+                }
+
+                @Override
+                public void onFailResponse() { }
+            });
         });
     }
 

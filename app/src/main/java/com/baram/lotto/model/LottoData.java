@@ -30,6 +30,18 @@ public class LottoData {
     public String getDrwtNo5() { return drwtNo5; }
     public String getDrwtNo6() { return drwtNo6; }
     public String getBnusNo() { return bnusNo; }
+    public String getNumber(int n) {
+        switch (n) {
+            case 1: return drwtNo1;
+            case 2: return drwtNo2;
+            case 3: return drwtNo3;
+            case 4: return drwtNo4;
+            case 5: return drwtNo5;
+            case 6: return drwtNo6;
+            case 7: return  bnusNo;
+            default: return "";
+        }
+    }
 
     public void setTotSellamnt(String Data) { totSellamnt = Data; }
     public void setReturnValue(String Data) { returnValue = Data; }
