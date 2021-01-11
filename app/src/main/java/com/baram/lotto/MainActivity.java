@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(getApplicationContext(), "미구현 기능입니다.", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btnMyNumber:
-                mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
+                mIntent = new Intent(getApplicationContext(), MyLottoNumber.class);
                 startActivity(mIntent);
                 break;
         }

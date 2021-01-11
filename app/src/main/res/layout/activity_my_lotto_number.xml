@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MyLottoNumber">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <Button
+            android:id="@+id/btnLottoNumberCompare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="당첨확인" />
+
+        <Button
+            android:id="@+id/btnLottoNumberManagement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="번호 관리"
+            android:onClick="OnLottoNumberManagementClick"/>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/LottoHistoryList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fastScrollEnabled="true"
+        android:fastScrollAlwaysVisible="true"
+        android:choiceMode="multipleChoice"
+        android:layout_weight="1" />
+
+</LinearLayout>
