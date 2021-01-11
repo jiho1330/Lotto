@@ -263,7 +263,7 @@
 
                 <Button
                     android:id="@+id/btnLotto"
-                    android:layout_width="150dp"
+                    android:layout_width="100dp"
                     android:layout_height="match_parent"
                     android:layout_margin="10dp"
                     android:background="@drawable/button_round"
@@ -275,13 +275,24 @@
 
                 <Button
                     android:id="@+id/btnQRCode"
-                    android:layout_width="150dp"
+                    android:layout_width="100dp"
                     android:layout_height="match_parent"
                     android:layout_margin="10dp"
                     android:background="@drawable/button_round"
                     android:backgroundTint="@color/white"
                     android:padding="5dp"
                     android:text="QR코드"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+                <Button
+                    android:id="@+id/btnMyNumber"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/button_round"
+                    android:backgroundTint="@color/white"
+                    android:padding="5dp"
+                    android:text="내 번호"
                     android:textColor="@color/black"
                     android:textSize="24sp" />
             </LinearLayout>

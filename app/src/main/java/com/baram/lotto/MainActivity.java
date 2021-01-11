@@ -34,7 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private Button btnLotto, btnQRCode, btnMapView, btnLottoHistory, btnVersion, btnQnA, btnRate;
+    private Button btnLotto, btnQRCode, btnMapView, btnLottoHistory, btnVersion, btnQnA, btnRate, btnMyNumber;
     private Button[] balls = new Button[7];
     private AdView mAdView;
     private InterstitialAd mInterstitialAd;
@@ -72,6 +72,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 평가하기 버튼
         btnRate = findViewById(R.id.btnRate);
         btnRate.setOnClickListener(this);
+
+        // 내 번호 버튼
+        btnMyNumber = findViewById(R.id.btnMyNumber);
+        btnMyNumber.setOnClickListener(this);
 
         // 현재 회차의 당첨결과
         tvTime = findViewById(R.id.tvTime);
@@ -221,6 +225,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btnQnA:
             case R.id.btnRate:
                 Toast.makeText(getApplicationContext(), "미구현 기능입니다.", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.btnMyNumber:
+                mIntent = new Intent(getApplicationContext(), LottoHistoryActivity.class);
+                startActivity(mIntent);
                 break;
         }
     }
